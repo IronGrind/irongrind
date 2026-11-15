@@ -604,6 +604,18 @@ function filterStaffRequests() {
     document.getElementById('staffRequestsStatus').textContent = visible ? `${visible} pending request(s).` : 'No matching pending requests.';
 }
 
+function setStaffRequestType(type) {
+    const select = document.getElementById('staffRequestType');
+    if (!select || !['all', 'registration', 'renewal', 'plan_change'].includes(type)) return;
+    select.value = type;
+    document.querySelectorAll('.staff-request-type-buttons [data-request-type]').forEach(button => {
+        const active = button.dataset.requestType === type;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+    filterStaffRequests();
+}
+
 async function loadStaffRequests() {
     const list = document.getElementById('staffRequestList');
     const status = document.getElementById('staffRequestsStatus');

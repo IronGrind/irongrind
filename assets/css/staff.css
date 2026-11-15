@@ -171,6 +171,17 @@ html[data-dashboard-theme="light"] body.staff-dashboard .staff-registration-form
 .staff-sale-stock-info { grid-column:1 / -1; font-size:.85rem; line-height:1.5; }
 .staff-sale-stock-info:empty { display:none; }
 .staff-request-filters { display:grid; grid-template-columns:minmax(0,2fr) minmax(140px,1fr); gap:14px; margin:18px 0; }
+.staff-filter-label { display:block; margin:0 0 7px; color:#455267; font-size:.78rem; font-weight:600; }
+.staff-request-type-buttons { display:flex; flex-wrap:wrap; gap:6px; padding:5px; border:1px solid #cbd2dc; border-radius:12px; background:#f2f4f7; }
+.staff-request-type-buttons button { min-height:38px; flex:1 1 auto; padding:8px 12px; border:1px solid transparent; border-radius:8px; color:#3f4b5e; background:transparent; font:inherit; font-size:.82rem; font-weight:600; cursor:pointer; transition:background .15s ease,color .15s ease,box-shadow .15s ease; }
+.staff-request-type-buttons button:hover { background:#e5e9ef; }
+.staff-request-type-buttons button.is-active { color:#fff; background:#a90000; box-shadow:0 2px 6px rgba(100,0,0,.2); }
+.staff-request-type-native { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-filter-label { color:#c7cedb; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-type-buttons { border-color:#454b57; background:#20242c; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-type-buttons button { color:#d2d7e0; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-type-buttons button:hover { background:#343a45; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-type-buttons button.is-active { color:#fff; background:#a90000; }
 .staff-request-card[hidden] { display:none !important; }
 .staff-status.error { color:#ffb2b2; background:#a320201a; border-left:4px solid #cb4545; padding:12px 16px; border-radius:10px; }
 html[data-dashboard-theme="light"] body.staff-dashboard .staff-status.error { color:#a32020 !important; }
