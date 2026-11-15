@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IronGrind Â· Admin Dashboard</title>
+    <title>IronGrind · Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css?v=20261115-add-member-modal-readability">
     <script src="assets/js/theme.js?v=20261105-login-toggle"></script>
@@ -31,7 +31,7 @@
                     <div class="member-account-menu-label">Appearance</div>
                     <button id="adminThemeLight" class="member-account-menu-item admin-theme-option" type="button" role="menuitemradio" data-dashboard-theme-option="light" aria-checked="false" onclick="setAdminTheme('light')"><i class="fas fa-sun" aria-hidden="true"></i><span>Light mode</span><i class="fas fa-check admin-theme-check" aria-hidden="true"></i></button>
                     <button id="adminThemeDark" class="member-account-menu-item admin-theme-option" type="button" role="menuitemradio" data-dashboard-theme-option="dark" aria-checked="true" onclick="setAdminTheme('dark')"><i class="fas fa-moon" aria-hidden="true"></i><span>Dark mode</span><i class="fas fa-check admin-theme-check" aria-hidden="true"></i></button>
-                    <div class="admin-trusted-device-info" id="adminTrustedDeviceInfo" role="status" aria-live="polite"><i class="fas fa-shield-halved" aria-hidden="true"></i><span><strong>Trusted browser</strong><small>Loading registered deviceâ€¦</small></span></div>
+                    <div class="admin-trusted-device-info" id="adminTrustedDeviceInfo" role="status" aria-live="polite"><i class="fas fa-shield-halved" aria-hidden="true"></i><span><strong>Trusted browser</strong><small>Loading registered device…</small></span></div>
                     <button class="member-account-menu-item member-account-menu-logout" type="button" role="menuitem" onclick="closeAdminAccountMenu(); logout()"><i class="fas fa-sign-out-alt" aria-hidden="true"></i><span><strong>Log out</strong><small>Keep this browser trusted</small></span></button>
                     <button class="member-account-menu-item member-account-menu-logout admin-forget-device-action" type="button" role="menuitem" onclick="closeAdminAccountMenu(); logout(true)"><i class="fas fa-shield-halved" aria-hidden="true"></i><span><strong>Forget this trusted browser</strong><small>Revoke trust and log out. Verification is required next time.</small></span></button>
                 </div>
@@ -79,7 +79,7 @@
                     <div class="form-group"><label for="staffEmail">Gmail address</label><input id="staffEmail" type="email" required pattern="[A-Za-z0-9._%+\-]+@[Gg][Mm][Aa][Ii][Ll][.][Cc][Oo][Mm]" maxlength="254" autocomplete="email" placeholder="name@gmail.com" title="Enter a Gmail address ending in @gmail.com"></div>
                     <div class="form-group"><label for="staffMobile">Mobile number</label><div class="ph-phone-input"><span>+63</span><input id="staffMobile" type="tel" required inputmode="numeric" maxlength="10" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" title="Enter 10 digits beginning with 9"></div></div>
                     <div class="form-group"><label for="staffGender">Gender</label><select id="staffGender" required><option value="">Select gender</option><option value="Female">Female</option><option value="Male">Male</option><option value="Prefer not to say">Prefer not to say</option></select></div>
-                    <div class="form-group staff-form-field-wide"><label for="staffPassword">Password</label><input id="staffPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="staffPasswordHint"><small id="staffPasswordHint" class="field-hint">Use 12â€“128 characters with uppercase and lowercase letters, a number, and a symbol.</small></div>
+                    <div class="form-group staff-form-field-wide"><label for="staffPassword">Password</label><input id="staffPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="staffPasswordHint"><small id="staffPasswordHint" class="field-hint">Use 12–128 characters with uppercase and lowercase letters, a number, and a symbol.</small></div>
                 </div>
                 <div class="form-group"><label for="staffConfirmPassword">Confirm staff password</label><input id="staffConfirmPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></div><div class="staff-form-footer"><button class="btn-primary" type="submit"><i class="fas fa-user-plus"></i> Create Account</button><p id="staffAccountStatus" class="activity-help" role="status" aria-live="polite"></p></div>
             </form>
@@ -130,7 +130,7 @@
                 </div>
                 <div class="panel">
                     <div class="panel-header">
-                        <h2><i class="fas fa-clock"></i> Today's Attendance â€” Time In / Out</h2>
+                        <h2><i class="fas fa-clock"></i> Today's Attendance — Time In / Out</h2>
                     </div>
                     <div id="dashboardAttendanceTable"></div>
                 </div>
@@ -208,7 +208,7 @@
                     <div class="qr-scanner-box" onclick="startQRScanner()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startQRScanner()}">
                         <i class="fas fa-camera"></i>
                         <h3>Scan Member QR Code</h3>
-                        <p>Scan a memberâ€™s QR to check them in. Scan the same QR again to check them out.</p>
+                        <p>Scan a member’s QR to check them in. Scan the same QR again to check them out.</p>
                     </div>
                     <p id="attendancePhoneStatus" class="attendance-phone-status" role="status">No phone camera paired.</p>
                     <div class="scanner-install-card">
@@ -229,7 +229,7 @@
                     <i class="fas fa-lock"></i>
                     <h3>Inventory is Locked</h3>
                     <p>Enter the inventory password once for this sign-in. Inventory stays unlocked until you log out.</p>
-                    <form class="password-input-group" onsubmit="event.preventDefault(); runWithButtonLoading(this.querySelector('button[type=submit]'), unlockStore, 'Checkingâ€¦');">
+                    <form class="password-input-group" onsubmit="event.preventDefault(); runWithButtonLoading(this.querySelector('button[type=submit]'), unlockStore, 'Checking…');">
                         <input type="password" id="storeAccessPassword" placeholder="Inventory password" autocomplete="current-password" aria-label="Inventory password" data-no-password-visibility="true" required>
                         <button type="submit" class="btn-primary"><i class="fas fa-unlock"></i> Open Inventory</button>
                     </form>
@@ -299,9 +299,9 @@
                         </div>
                     </div>
                     <div class="stats-grid walkin-sales-summary">
-                        <div class="stat-card"><div class="stat-label">Total Income</div><div class="stat-value" id="walkinTotalIncome">â‚±0</div><div class="stat-sub">All walk-in products</div></div>
-                        <div class="stat-card"><div class="stat-label">Supplement Income</div><div class="stat-value" id="walkinSupplementIncome">â‚±0</div><div class="stat-sub">Supplements sold</div></div>
-                        <div class="stat-card"><div class="stat-label">Merchandise Income</div><div class="stat-value" id="walkinMerchIncome">â‚±0</div><div class="stat-sub">Merchandise sold</div></div>
+                        <div class="stat-card"><div class="stat-label">Total Income</div><div class="stat-value" id="walkinTotalIncome">₱0</div><div class="stat-sub">All walk-in products</div></div>
+                        <div class="stat-card"><div class="stat-label">Supplement Income</div><div class="stat-value" id="walkinSupplementIncome">₱0</div><div class="stat-sub">Supplements sold</div></div>
+                        <div class="stat-card"><div class="stat-label">Merchandise Income</div><div class="stat-value" id="walkinMerchIncome">₱0</div><div class="stat-sub">Merchandise sold</div></div>
                     </div>
                 </div>
             </div>
@@ -336,7 +336,7 @@
             </div>
         </main>
     </div>
-    <footer class="dashboard-footer">Â© 2026 Iron Grind Fitness Gym Â· Dapitan City</footer>
+    <footer class="dashboard-footer">© 2026 Iron Grind Fitness Gym · Dapitan City</footer>
 </div>
 
 <div id="modalOverlay" class="modal-overlay hidden" onclick="if(event.target===this) closeModal()">
@@ -357,7 +357,7 @@
 <script src="assets/js/signature.js"></script>
 <script src="assets/js/activity-logs.js?v=20261115-hide-report-exports"></script>
 <script src="assets/js/admin-access.js?v=20261108-reviewed"></script>
-<script src="assets/js/admin.js?v=20261115-add-member-modal-readability"></script>
+<script src="assets/js/admin.js?v=20261116-admin-text-encoding"></script>
 <script src="assets/js/staff-accounts.js?v=20261108-names-member-email"></script>
 </body>
 </html>
