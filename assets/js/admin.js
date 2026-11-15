@@ -4087,7 +4087,7 @@ function getMembershipIncomeBreakdown(period) {
         { label: 'Monthly', ...breakdown.Monthly },
         { label: 'Half Month', ...breakdown['Half Month'] },
         { label: 'Walk-in (Daily)', ...breakdown.WalkIn },
-        { label: 'Other plans', ...breakdown.Other }
+        { label: 'Daily (Online)', ...breakdown.Other }
     ];
     return {
         rows,
