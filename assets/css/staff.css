@@ -403,9 +403,7 @@ html[data-dashboard-theme="light"] body.staff-dashboard .staff-member-search > d
 .staff-request-card-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
 .staff-request-card h3 { margin:0; color:#202938; font-size:1rem; line-height:1.4; overflow-wrap:anywhere; }
 .staff-request-kind { flex:0 0 auto; padding:5px 8px; border-radius:999px; color:#8d1118; background:#fff0f0; font-size:.68rem; font-weight:700; line-height:1.1; }
-.staff-request-plan { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:16px; padding:12px; border:1px solid #edf0f4; border-radius:11px; background:#f8f9fb; }
-.staff-request-plan strong { color:#303b4d; font-size:.88rem; }
-.staff-request-price { color:#202938; font-size:.9rem; font-weight:750; white-space:nowrap; }
+.staff-request-plan { margin:15px 0 0; padding:11px 12px; border:1px solid #edf0f4; border-radius:11px; background:#f8f9fb; color:#303b4d; font-size:.86rem; font-weight:600; line-height:1.45; }
 .staff-request-card .staff-request-date { display:flex; align-items:flex-start; gap:7px; margin-top:13px; color:#758095; font-size:.73rem; line-height:1.4; }
 .staff-request-card .staff-request-date i { margin-top:2px; color:#a90000; }
 .staff-request-card .staff-form-actions { justify-content:flex-end; margin-top:auto; padding-top:17px; }
@@ -413,9 +411,7 @@ html[data-dashboard-theme="light"] body.staff-dashboard .staff-member-search > d
 html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-card { border-color:#373d49; background:#1e222a; }
 html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-card h3 { color:#f1f3f7; }
 html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-kind { color:#ffb4b7; background:#482328; }
-html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-plan { border-color:#373d49; background:#272c36; }
-html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-plan strong,
-html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-price { color:#e4e8ef; }
+html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-plan { border-color:#373d49; background:#272c36; color:#e4e8ef; }
 html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-date { color:#a4adc2; }
 @media(max-width:1200px) { .staff-request-list { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:900px) { .staff-request-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
