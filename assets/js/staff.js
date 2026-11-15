@@ -624,6 +624,62 @@ function setStaffRequestType(type) {
     filterStaffRequests();
 }
 
+function openStaffRequestForm(request) {
+    const dialog = document.getElementById('staffRequestFormDialog');
+    const content = document.getElementById('staffRequestFormContent');
+    if (!dialog || !content) return;
+    document.getElementById('staffRequestFormTitle').textContent = request.full_name || 'Request details';
+    content.replaceChildren();
+
+    const displayValue = value => {
+        if (Array.isArray(value)) return value.length ? value.join(', ') : 'Not provided';
+        if (value && typeof value === 'object') return Object.values(value).filter(Boolean).join(' · ') || 'Not provided';
+        if (value === null || value === undefined || String(value).trim() === '') return 'Not provided';
+        return String(value);
+    };
+    const addSection = (title, fields) => {
+        const section = document.createElement('section'); section.className = 'staff-request-form-section';
+        const heading = document.createElement('h3'); heading.textContent = title;
+        const list = document.createElement('dl');
+        fields.forEach(([label, value]) => {
+            const row = document.createElement('div'); row.className = 'staff-request-detail-row';
+            const term = document.createElement('dt'); term.textContent = label;
+            const description = document.createElement('dd'); description.textContent = displayValue(value);
+            row.append(term, description); list.append(row);
+        });
+        section.append(heading, list); content.append(section);
+    };
+    const requestLabel = request.application_type === 'renewal' ? 'Renewal' : request.application_type === 'plan_change' ? 'Plan change' : 'Registration';
+    const emergency = request.emergency_contact_data && typeof request.emergency_contact_data === 'object' ? request.emergency_contact_data : {};
+    const height = request.height ? `${request.height} ${request.height_unit || ''}`.trim() : '';
+    const submitted = request.submitted_at ? new Date(request.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '';
+
+    addSection('Membership request', [
+        ['Request type', requestLabel], ['Membership plan', request.plan], ['Amount', formatStaffPeso(request.plan_price)],
+        ['Submitted', submitted], ['Requested start date', request.start_date], ['Requested end date', request.end_date]
+    ]);
+    addSection('Member information', [
+        ['Full name', request.full_name], ['Email', request.email], ['Mobile number', request.mobile],
+        ['Date of birth', request.date_of_birth], ['Age', request.age], ['Sex', request.sex],
+        ['Height', height], ['Weight (kg)', request.weight_kg]
+    ]);
+    addSection('Emergency contact', [
+        ['Name', emergency.name], ['Relationship', emergency.relationship], ['Contact number', emergency.contact || emergency.mobile]
+    ]);
+    addSection('Fitness and health', [
+        ['Fitness goals', request.fitness_goals], ['Health conditions', request.health_conditions],
+        ['Other medical details', request.other_medical_conditions]
+    ]);
+
+    if (typeof request.signature_path === 'string' && request.signature_path.startsWith('data:image/')) {
+        const section = document.createElement('section'); section.className = 'staff-request-form-section';
+        const heading = document.createElement('h3'); heading.textContent = 'Member signature';
+        const image = document.createElement('img'); image.className = 'staff-request-signature'; image.src = request.signature_path; image.alt = `Signature of ${request.full_name || 'member'}`;
+        section.append(heading, image); content.append(section);
+    }
+    dialog.showModal();
+}
+
 async function loadStaffRequests() {
     const list = document.getElementById('staffRequestList');
     const status = document.getElementById('staffRequestsStatus');
@@ -655,6 +711,10 @@ async function loadStaffRequests() {
             const dateText = document.createElement('span'); dateText.textContent = `Submitted ${new Date(request.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}`;
             date.append(dateIcon, dateText);
             const actions = document.createElement('div'); actions.className = 'staff-form-actions';
+            const viewButton = document.createElement('button'); viewButton.type = 'button';
+            viewButton.className = 'staff-request-view-button'; viewButton.innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i> View form';
+            viewButton.addEventListener('click', () => openStaffRequestForm(request));
+            actions.append(viewButton);
             for (const [decision, label] of [['approved', 'Approve'], ['rejected', 'Reject']]) {
                 const button = document.createElement('button'); button.type = 'button';
                 button.className = decision === 'approved' ? 'btn-primary' : 'btn-logout'; button.textContent = label;
