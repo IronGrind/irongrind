@@ -17,11 +17,13 @@ Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return response({ error: 'Method not allowed.' }, 405);
 
+  const authorization = request.headers.get('Authorization');
+  if (!authorization) return response({ error: 'Sign in again to continue.' }, 401);
+
   const url = Deno.env.get('SUPABASE_URL');
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const configuredPassword = Deno.env.get('STORE_ACCESS_PASSWORD');
-  const authorization = request.headers.get('Authorization');
-  if (!url || !anonKey || !configuredPassword || !authorization) {
+  if (!url || !anonKey || !configuredPassword) {
     return response({ error: 'Store password verification is not configured.' }, 503);
   }
 

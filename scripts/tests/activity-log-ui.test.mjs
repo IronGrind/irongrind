@@ -10,7 +10,7 @@ function setup(rows) {
     };
     element('activityFilters').querySelectorAll = () => [];
     const query = {};
-    for (const method of ['select','order','eq','in','ilike','gte','lt']) query[method] = (...args) => { calls.push([method, ...args]); return query; };
+    for (const method of ['select','order','eq','neq','in','ilike','gte','lt']) query[method] = (...args) => { calls.push([method, ...args]); return query; };
     query.range = async () => ({ data: rows, count: rows.length });
     const context = vm.createContext({ Intl, Date, console, document: { getElementById: element, createElement: () => ({}) },
         window: { ironGrindSupabase: { from: () => query } } });
@@ -33,6 +33,7 @@ test('category and action filters are applied together on the server', async () 
     fixture.element('activityAction').value='renewal';
     await fixture.load();
     const category = fixture.calls.find(call => call[0] === 'in');
+    assert.ok(fixture.calls.some(call => call[0] === 'neq' && call[1] === 'entity_type' && call[2] === 'reports'));
     assert.equal(category[1], 'entity_type');
     assert.deepEqual(Array.from(category[2]), ['members','membership_applications','membership_history']);
     assert.ok(fixture.calls.some(call => call[0] === 'eq' && call[1] === 'action' && call[2] === 'renewal'));

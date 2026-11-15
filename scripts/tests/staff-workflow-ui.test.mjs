@@ -23,7 +23,7 @@ test('request search and type filters combine without changing request records',
         { dataset: { searchText: 'juan monthly', requestType: 'registration' } }
     ];
     const elements = { staffRequestSearch: { value: 'ANA' }, staffRequestType: { value: 'renewal' }, staffRequestsStatus: {} };
-    const context = vm.createContext({ document: { getElementById: id => elements[id], querySelectorAll: () => cards } });
+    const context = vm.createContext({ document: { getElementById: id => elements[id], querySelector: () => null, querySelectorAll: () => cards } });
     load('filterStaffRequests', context); context.filterStaffRequests();
     assert.equal(cards[0].hidden, false); assert.equal(cards[1].hidden, true);
     elements.staffRequestType.value = 'registration'; context.filterStaffRequests();
@@ -60,11 +60,24 @@ test('attendance name lookup searches first and requires selection before record
 
 test('attendance records the selected member ID rather than their possibly shared name', async () => {
     let recorded;
-    const context = vm.createContext({ staffBusy: false, staffSelectedAttendanceMember: { id: 'unique-member-id' }, pendingStaffScan: null,
-        document: { getElementById: () => ({ value: 'Ana' }) },
-        recordStaffAttendance: async id => { recorded = id; }, clearStaffAttendanceSelection() {}
+    const buttons = [];
+    const results = { textContent: '', replaceChildren() { buttons.length = 0; }, append(button) { buttons.push(button); } };
+    const context = vm.createContext({ staffBusy: false, staffAttendanceSearchRevision: 0,
+        document: {
+            getElementById: id => id === 'staffIdentifier' ? { value: 'Ana' } : results,
+            createElement: () => ({ append() {}, addEventListener(name, handler) { this[name] = handler; } })
+        },
+        staffClient: { rpc: async (name, args) => {
+            assert.equal(name, 'staff_search_members');
+            assert.equal(args.p_query, 'Ana');
+            return { data: [{ id: 'first-member', full_name: 'Ana' }, { id: 'unique-member-id', full_name: 'Ana' }] };
+        } },
+        recordStaffAttendance: async id => { recorded = id; return true; }, clearStaffAttendanceSelection() {}
     });
     load('submitStaffAttendanceLookup', context);
     await context.submitStaffAttendanceLookup({ preventDefault() {} });
+    assert.equal(recorded, undefined, 'Searching alone must not record attendance');
+    assert.equal(buttons.length, 2);
+    await buttons[1].click();
     assert.equal(recorded, 'unique-member-id');
 });

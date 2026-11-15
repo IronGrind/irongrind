@@ -52,7 +52,9 @@ context.document = { getElementById(id) {
 } };
 Object.assign(context, { members: [], attendance: [], sales: [], products: [], todayStr: () => '2026-11-04', formatPeso: amount => `PHP ${amount}`, productIsLowStock: () => false, getMemberActivityStatus: () => 'Active' });
 const renderStart = source.indexOf('function renderDashboard()');
-const renderEnd = source.indexOf('/* ========== RENDER: MEMBERS', renderStart);
+const renderEnd = source.indexOf('\n}', renderStart) + 2;
+assert.ok(renderStart >= 0 && renderEnd > renderStart);
+context.renderDashboardSalesTrend = () => {};
 vm.runInContext(source.slice(renderStart, renderEnd), context);
 context.pendingApprovals = [
     { id: 'new-registration', status: 'pending', source: 'supabase-registration' },

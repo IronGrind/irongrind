@@ -12,6 +12,7 @@ let inserted;
 let selected;
 let removedDraft = false;
 let displayedError = '';
+const notices = new Map();
 const context = vm.createContext({
     window: { ironGrindSupabase: { from(table) {
         assert.equal(table, 'membership_applications');
@@ -23,12 +24,12 @@ const context = vm.createContext({
             } };
         } };
     } } },
-    localStorage: { removeItem(key) {
+    localStorage: { getItem(key) { return notices.get(key) || null; }, setItem(key, value) { notices.set(key, value); }, removeItem(key) {
         assert.equal(key, 'ig_registration_draft');
         removedDraft = true;
     } },
     showError(message) { displayedError = message; },
-    console: { error() {} }
+    console: { error() {}, warn() {} }
 });
 vm.runInContext(source.slice(start, end), context);
 
@@ -58,4 +59,5 @@ assert.equal(inserted.status, 'pending');
 assert.equal(selected, 'id, status, auth_user_id');
 assert.equal(draft.application.id, 'saved-application');
 assert.equal(removedDraft, true);
+assert.deepEqual(JSON.parse(notices.get('ig_member_application_notifications_pending')), [{ id: 'saved-application', userId: 'new-user' }]);
 console.log('Passed: submission succeeds only for a saved pending application linked to the registering account; failures preserve the draft.');
