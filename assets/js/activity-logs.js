@@ -8,7 +8,7 @@
     const actions = { insert: 'Created', update: 'Updated', delete: 'Deleted', check_in: 'Checked in', check_out: 'Checked out', signed_in: 'Signed in', sign_out_requested: 'Requested sign-out', approved: 'Approved', rejected: 'Rejected', archived: 'Archived', restored: 'Restored', renewal: 'Renewed', expired: 'Expired', plan_change: 'Changed plan' };
     const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
     const dateFormat = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' });
-    Object.assign(areas, { security: 'Security', reports: 'Report exports' });
+    Object.assign(areas, { security: 'Security' });
     Object.assign(actions, {
         admin_device_registered: 'Administrator device registered', admin_device_forgotten: 'Administrator device trust revoked',
         admin_login_approval_requested: 'Device sign-in requested', admin_login_approved: 'Device sign-in approved', admin_login_denied: 'Device sign-in denied',
@@ -18,7 +18,7 @@
         sign_in_throttled: 'Sign-in rate limit reached', password_updated: 'Password updated',
         password_reset_requested: 'Password reset requested', member_signed_in: 'Member signed in',
         member_sign_out_requested: 'Member requested sign-out', scanner_signed_in: 'Scanner operator signed in',
-        scanner_sign_out_requested: 'Scanner operator requested sign-out', report_export_requested: 'Report export requested'
+        scanner_sign_out_requested: 'Scanner operator requested sign-out'
     });
     const categories = {
         membership: { label: 'Membership', types: ['members', 'membership_applications', 'membership_history'] },
@@ -28,8 +28,7 @@
         accounts: { label: 'Accounts', types: ['profiles'] },
         security: { label: 'Security', types: ['security'] },
         session: { label: 'Sessions', types: ['session'] },
-        pairing: { label: 'Phone pairings', types: ['mobile_attendance_scan_sessions', 'mobile_attendance_pairing_policy'] },
-        reports: { label: 'Reports', types: ['reports'] }
+        pairing: { label: 'Phone pairings', types: ['mobile_attendance_scan_sessions', 'mobile_attendance_pairing_policy'] }
     };
     Object.assign(actions, { renewal: 'Membership renewed', plan_change: 'Membership plan changed',
         phone_pairing_created: 'Pairing QR created', phone_paired: 'Phone paired', phone_unpaired: 'Phone unpaired',
@@ -91,6 +90,7 @@
             const to = document.getElementById('activityTo').value;
             if (from && to && from > to) throw new Error('The From date must be on or before the To date.');
             let query = client.from('activity_logs').select('*', { count: 'exact' })
+                .neq('entity_type', 'reports')
                 .order('occurred_at', { ascending: false }).order('id', { ascending: false });
             const actor = document.getElementById('activityActor').value.trim();
             const role = document.getElementById('activityRole').value;
