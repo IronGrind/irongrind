@@ -385,10 +385,15 @@ html[data-dashboard-theme="light"] body.staff-dashboard .staff-member-search > d
   background: #fff;
   box-shadow: 0 5px 16px rgba(68,35,39,.055);
 }
-.staff-request-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:16px; }
-.staff-request-card { border:1px solid var(--border-color,#343b48); border-radius:16px; padding:20px; }
-.staff-request-card p { margin:12px 0; }
-.staff-request-card .staff-form-actions { margin-top:18px; }
+.staff-request-list { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:stretch; gap:14px; }
+.staff-request-card { display:flex; min-width:0; flex-direction:column; border:1px solid var(--border-color,#343b48); border-radius:14px; padding:18px; background:#21191b; box-shadow:0 5px 16px rgba(35,45,60,.045); }
+.staff-request-card h3 { margin:0; font-size:1rem; line-height:1.35; overflow-wrap:anywhere; }
+.staff-request-card p { margin:12px 0 8px; line-height:1.45; }
+.staff-request-card small { color:#586579; line-height:1.4; }
+.staff-request-card .staff-form-actions { justify-content:flex-end; margin-top:auto; padding-top:16px; }
+@media(max-width:1200px) { .staff-request-list { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:900px) { .staff-request-list { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) { .staff-request-list { grid-template-columns:minmax(0,1fr); gap:11px; } .staff-request-card { padding:16px; } }
 .staff-history .staff-visit-incomplete { color:#d89627; font-weight:600; }
 .staff-visit-incomplete::before { content:"\f071"; font-family:"Font Awesome 6 Free"; font-weight:900; margin-right:7px; }
 

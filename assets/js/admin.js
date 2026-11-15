@@ -1,4 +1,4 @@
-/* ========== AUTH GUARD ========== */
+﻿/* ========== AUTH GUARD ========== */
 let activeDashboardRole = 'admin';
 function validPersonName(value) {
     const name = String(value || '').trim();
@@ -9,7 +9,7 @@ function composeAdminMemberName(firstName, middleInitial, lastName) {
     const middle = String(middleInitial || '').trim();
     const last = String(lastName || '').trim().replace(/\s+/g, ' ');
     if (!validPersonName(first) || !validPersonName(last)) {
-        throw new Error('Enter the member’s first and last names; numbers are not allowed.');
+        throw new Error('Enter the memberâ€™s first and last names; numbers are not allowed.');
     }
     if (first.length > 70 || last.length > 70) {
         throw new Error('First and last names must each be 70 characters or fewer.');
@@ -109,9 +109,9 @@ function addDays(dateStr, days) {
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(Date.UTC(year, month - 1, day + days, 12)).toISOString().slice(0, 10);
 }
-function formatPeso(n) { return '₱' + Number(n).toLocaleString('en-PH'); }
+function formatPeso(n) { return 'â‚±' + Number(n).toLocaleString('en-PH'); }
 function formatAttendanceClock(value) {
-    if (!value) return '—';
+    if (!value) return 'â€”';
     const match = /^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i.exec(String(value).trim());
     if (!match) return String(value);
     let hour = Number(match[1]);
@@ -195,7 +195,7 @@ function stockDeductionForSale(product, quantity) {
 function productSaleUnitLabel(product) { return saleUnitLabel(product.inventoryUnit || (product.category === 'Supplement' ? 'gram' : 'item')); }
 function productClassification(product) {
     return product.category === 'Supplement'
-        ? `${supplementTypeLabel(product.supplementType || 'other')} · ${supplementFormLabel(product.supplementForm || 'powder')}`
+        ? `${supplementTypeLabel(product.supplementType || 'other')} Â· ${supplementFormLabel(product.supplementForm || 'powder')}`
         : merchandiseTypeLabel(product.merchType || (product.size ? 'apparel' : 'other'));
 }
 function lowStockThreshold(product) {
@@ -310,7 +310,7 @@ function openModal(html) {
     document.getElementById('modalContent').innerHTML = html;
     document.getElementById('modalOverlay').classList.remove('hidden');
 }
-async function runWithButtonLoading(button, action, loadingLabel = 'Working…') {
+async function runWithButtonLoading(button, action, loadingLabel = 'Workingâ€¦') {
     if (!button || button.disabled) return;
     const originalHTML = button.innerHTML;
     const originalWidth = button.style.width;
@@ -347,7 +347,7 @@ function closeModal(preservePhoneCameraAuthorization = false) {
     pendingPairingLimitPin = null;
     if (!preservePhoneCameraAuthorization) phoneCameraAuthorization = null;
     document.getElementById('modalOverlay').classList.add('hidden');
-    document.getElementById('modalContent').classList.remove('report-pdf-modal');
+    document.getElementById('modalContent').classList.remove('report-pdf-modal', 'admin-add-member-modal');
     stopQRScanner();
 }
 let pendingConfirmationAction = null;
@@ -463,7 +463,7 @@ function switchApprovalType(type) {
 }
 
 function logout(forgetDevice = false) {
-    askConfirmation(forgetDevice ? 'Forget this trusted browser?' : 'Log out?', forgetDevice ? 'This revokes this browser’s administrator trust and ends its dashboard and scanner sessions. You will need to verify again the next time you sign in here.' : 'Your browser will stay trusted, so the next sign-in here will not need a new verification code.', forgetDevice ? 'Forget browser and log out' : 'Log out', async () => {
+    askConfirmation(forgetDevice ? 'Forget this trusted browser?' : 'Log out?', forgetDevice ? 'This revokes this browserâ€™s administrator trust and ends its dashboard and scanner sessions. You will need to verify again the next time you sign in here.' : 'Your browser will stay trusted, so the next sign-in here will not need a new verification code.', forgetDevice ? 'Forget browser and log out' : 'Log out', async () => {
         window.stopAccountSessionMonitor?.(window.ironGrindSupabase);
         if (forgetDevice) {
             try { await window.forgetAdminDevice(window.ironGrindSupabase); }
@@ -524,7 +524,7 @@ function renderDashboard() {
 
     const lowList = document.getElementById('lowStockList');
     if (low.length === 0) lowList.innerHTML = '<div class="empty-state">All items are well-stocked.</div>';
-    else lowList.innerHTML = low.map(p => `<div class="low-stock-item" aria-label="Low stock: ${escapeHTML(p.name)}, ${escapeHTML(formatProductStock(p))} remaining"><div class="low-stock-info"><span class="name">${escapeHTML(p.name)}${p.category === 'Merch' && p.size ? ' — ' + escapeHTML(p.size) : ''}</span><span class="low-stock-badge"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> LOW STOCK</span></div><span class="qty"><strong>${escapeHTML(formatProductStock(p))}</strong><small>remaining</small></span><button class="btn-sm low-stock-manage" type="button" onclick="openLowStockInventory('${escapeHTML(p.id)}')"><i class="fas fa-pen-to-square" aria-hidden="true"></i> Manage</button></div>`).join('');
+    else lowList.innerHTML = low.map(p => `<div class="low-stock-item" aria-label="Low stock: ${escapeHTML(p.name)}, ${escapeHTML(formatProductStock(p))} remaining"><div class="low-stock-info"><span class="name">${escapeHTML(p.name)}${p.category === 'Merch' && p.size ? ' â€” ' + escapeHTML(p.size) : ''}</span><span class="low-stock-badge"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> LOW STOCK</span></div><span class="qty"><strong>${escapeHTML(formatProductStock(p))}</strong><small>remaining</small></span><button class="btn-sm low-stock-manage" type="button" onclick="openLowStockInventory('${escapeHTML(p.id)}')"><i class="fas fa-pen-to-square" aria-hidden="true"></i> Manage</button></div>`).join('');
 
     const pending = pendingApprovals.filter(p => p.status === 'pending');
     document.getElementById('pendingBadge').textContent = pending.length;
@@ -601,14 +601,14 @@ function renderDashboardSalesTrend(today, todayTotal, todayCount) {
             return saleKey === previousKey ? sum + Number(sale.total || 0) : sum;
         }, 0);
         const percent = previousAmount > 0 ? ((amount - previousAmount) / previousAmount) * 100 : null;
-        const percentLabel = percent === null ? '—%' : `${percent > 0 ? '+' : ''}${percent.toFixed(1)}%`;
+        const percentLabel = percent === null ? 'â€”%' : `${percent > 0 ? '+' : ''}${percent.toFixed(1)}%`;
         const percentClass = percent === null ? 'is-neutral' : percent > 0 ? 'is-up' : percent < 0 ? 'is-down' : 'is-neutral';
-        const tooltip = `${bucket.title}: ${formatPeso(amount)} · ${percent === null ? `${amount > 0 ? 'New sales' : 'No sales'}; percentage change is undefined without a previous sales baseline` : `${percentLabel} vs previous ${dashboardSalesPeriod === 'year' ? 'month' : 'day'}`}`;
+        const tooltip = `${bucket.title}: ${formatPeso(amount)} Â· ${percent === null ? `${amount > 0 ? 'New sales' : 'No sales'}; percentage change is undefined without a previous sales baseline` : `${percentLabel} vs previous ${dashboardSalesPeriod === 'year' ? 'month' : 'day'}`}`;
         return `<g><title>${escapeHTML(tooltip)}</title>${showLabel ? `<text class="sales-trend-percent ${percentClass}" x="${x + barWidth / 2}" y="${Math.max(13, y - 7)}" text-anchor="middle">${escapeHTML(percentLabel)}</text>` : ''}<rect class="sales-trend-bar${isToday ? ' is-today' : ''}" x="${x}" y="${y}" width="${barWidth}" height="${height}" rx="${Math.min(7, barWidth / 3)}"></rect>${showLabel ? `<text class="sales-trend-label" x="${x + barWidth / 2}" y="166" text-anchor="middle">${escapeHTML(bucket.label)}</text>` : ''}</g>`;
     }).join('');
     const hasSales = [...totals.values()].some(value => value > 0);
     const rangeTitle = dashboardSalesPeriod === 'month' ? 'This month, by day' : dashboardSalesPeriod === 'year' ? 'This year, by month' : 'Last 7 days';
-    container.innerHTML = `<div class="dashboard-sales-periods" role="group" aria-label="Sales trend period">${[['week', '7 days'], ['month', 'This month'], ['year', 'This year']].map(([period, label]) => `<button type="button" class="${dashboardSalesPeriod === period ? 'active' : ''}" aria-pressed="${dashboardSalesPeriod === period}" onclick="setDashboardSalesPeriod('${period}')">${label}</button>`).join('')}</div><p class="dashboard-sales-range-title">${rangeTitle} · labels show change vs previous ${dashboardSalesPeriod === 'year' ? 'month' : 'day'}</p><div class="dashboard-sales-chart-wrap"><svg class="dashboard-sales-chart" viewBox="0 0 ${chartWidth} 180" role="img" aria-label="${rangeTitle} paid sales with percentage change labels above the bars."><line class="sales-trend-grid" x1="0" y1="142" x2="${chartWidth}" y2="142"></line>${bars}</svg>${hasSales ? '' : '<p class="sales-trend-empty">No paid sales recorded for this period.</p>'}</div><div class="dashboard-sales-summary"><div><span>Today\'s Sales</span><strong>${escapeHTML(formatPeso(todayTotal))}</strong></div><div><span>Paid transactions today</span><strong>${todayCount}</strong></div></div>`;
+    container.innerHTML = `<div class="dashboard-sales-periods" role="group" aria-label="Sales trend period">${[['week', '7 days'], ['month', 'This month'], ['year', 'This year']].map(([period, label]) => `<button type="button" class="${dashboardSalesPeriod === period ? 'active' : ''}" aria-pressed="${dashboardSalesPeriod === period}" onclick="setDashboardSalesPeriod('${period}')">${label}</button>`).join('')}</div><p class="dashboard-sales-range-title">${rangeTitle} Â· labels show change vs previous ${dashboardSalesPeriod === 'year' ? 'month' : 'day'}</p><div class="dashboard-sales-chart-wrap"><svg class="dashboard-sales-chart" viewBox="0 0 ${chartWidth} 180" role="img" aria-label="${rangeTitle} paid sales with percentage change labels above the bars."><line class="sales-trend-grid" x1="0" y1="142" x2="${chartWidth}" y2="142"></line>${bars}</svg>${hasSales ? '' : '<p class="sales-trend-empty">No paid sales recorded for this period.</p>'}</div><div class="dashboard-sales-summary"><div><span>Today\'s Sales</span><strong>${escapeHTML(formatPeso(todayTotal))}</strong></div><div><span>Paid transactions today</span><strong>${todayCount}</strong></div></div>`;
 }
 
 function setDashboardSalesPeriod(period) {
@@ -689,7 +689,7 @@ function renderMembers() {
                     <div class="member-avatar">${initials(m.name)}</div>
                     <div class="member-details">
                         <h4>${m.name}</h4>
-                        <p>${m.plan} · Expires ${m.expiry}${isExpiredTab ? ' · EXPIRED' : ''}</p>
+                        <p>${m.plan} Â· Expires ${m.expiry}${isExpiredTab ? ' Â· EXPIRED' : ''}</p>
                     </div>
                 </div>
                 <div class="member-actions">
@@ -711,10 +711,10 @@ function filterPlan(plan) {
 function viewMemberDetails(id) {
     const member = members.find(item => String(item.id) === String(id));
     if (!member) return;
-    const field = (label, value) => `<div class="member-detail-field"><span>${escapeHTML(label)}</span><strong>${escapeHTML(value || '—')}</strong></div>`;
+    const field = (label, value) => `<div class="member-detail-field"><span>${escapeHTML(label)}</span><strong>${escapeHTML(value || 'â€”')}</strong></div>`;
     const emergency = member.emergencyContact && typeof member.emergencyContact === 'object'
-        ? [member.emergencyContact.name, member.emergencyContact.relationship, member.emergencyContact.contact].filter(Boolean).join(' · ')
-        : member.emergencyContact || '—';
+        ? [member.emergencyContact.name, member.emergencyContact.relationship, member.emergencyContact.contact].filter(Boolean).join(' Â· ')
+        : member.emergencyContact || 'â€”';
     const healthConditions = Array.isArray(member.healthConditions) && member.healthConditions.length
         ? member.healthConditions.join(', ')
         : 'None reported';
@@ -726,7 +726,7 @@ function viewMemberDetails(id) {
         : '';
 
     openModal(`<h3><i class="fas fa-user"></i> Member Details</h3>
-        <p class="modal-sub">${escapeHTML(member.name)} · ${escapeHTML(member.registrationSource || 'Member record')}</p>
+        <p class="modal-sub">${escapeHTML(member.name)} Â· ${escapeHTML(member.registrationSource || 'Member record')}</p>
         <div class="member-detail-grid">
             ${field('Email', member.email)}${field('Mobile', member.contact)}
             ${field('Date of birth', member.dob)}${field('Age', member.age ? String(member.age) : '')}${field('Sex', member.sex)}
@@ -775,19 +775,19 @@ function renderApprovals(type = currentApprovalType) {
                     <div class="member-avatar">${initials(p.fullName)}</div>
                     <div class="member-details">
                         <h4>${p.fullName}</h4>
-                        <p><strong>${p.source === 'dashboard-renewal' ? 'Renewal application' : 'New member registration'}</strong> · Applied ${new Date(p.submittedAt).toLocaleString()}</p>
+                        <p><strong>${p.source === 'dashboard-renewal' ? 'Renewal application' : 'New member registration'}</strong> Â· Applied ${new Date(p.submittedAt).toLocaleString()}</p>
                     </div>
                 </div>
                 <div class="approval-card-badges"><span class="badge-status reserved">${p.source === 'dashboard-renewal' ? 'Renewal' : 'Registration'}</span><span class="badge-status reserved">Pending</span></div>
             </div>
             <div class="approval-detail-grid">
                     <div class="approval-detail">
-                        <span class="approval-detail-label">Age · Sex</span>
-                        <span>${p.age || '—'} · ${p.sex || '—'}</span>
+                        <span class="approval-detail-label">Age Â· Sex</span>
+                        <span>${p.age || 'â€”'} Â· ${p.sex || 'â€”'}</span>
                     </div>
                     <div class="approval-detail">
                         <span class="approval-detail-label">Mobile</span>
-                        <span>${p.mobile || p.contact || '—'}</span>
+                        <span>${p.mobile || p.contact || 'â€”'}</span>
                     </div>
                     <div class="approval-detail">
                         <span class="approval-detail-label">Height</span>
@@ -795,15 +795,15 @@ function renderApprovals(type = currentApprovalType) {
                     </div>
                     <div class="approval-detail">
                         <span class="approval-detail-label">Plan</span>
-                        <span><strong>${p.plan || 'Renewal'}</strong> — ₱${Number(p.planPrice || 0).toLocaleString('en-PH')}</span>
+                        <span><strong>${p.plan || 'Renewal'}</strong> â€” â‚±${Number(p.planPrice || 0).toLocaleString('en-PH')}</span>
                     </div>
                     <div class="approval-detail">
                         <span class="approval-detail-label">Dates</span>
-                        <span>${p.startDate || '—'} → ${p.endDate || '—'}</span>
+                        <span>${p.startDate || 'â€”'} â†’ ${p.endDate || 'â€”'}</span>
                     </div>
                     <div class="approval-detail">
                         <span class="approval-detail-label">Emergency Contact</span>
-                        <span>${p.emergencyContact ? `${p.emergencyContact.name} (${p.emergencyContact.relationship}) · ${p.emergencyContact.contact}` : 'Not provided for renewal'}</span>
+                        <span>${p.emergencyContact ? `${p.emergencyContact.name} (${p.emergencyContact.relationship}) Â· ${p.emergencyContact.contact}` : 'Not provided for renewal'}</span>
                     </div>
                     ${p.email ? `<div class="approval-detail"><span class="approval-detail-label">Email</span><span>${escapeHTML(p.email)}</span></div>` : ''}
                     <div class="approval-detail">
@@ -814,7 +814,7 @@ function renderApprovals(type = currentApprovalType) {
             ${p.signature ? `<div class="approval-signature"><span class="approval-detail-label">Member Signature</span><img src="${p.signature}" alt="${p.fullName}'s digital signature"></div>` : ''}
             <div class="approval-actions">
                 <button class="btn-sm" onclick="rejectApplication('${p.id}')"><i class="fas fa-times"></i> Reject</button>
-                    <button class="btn-primary" onclick="runWithButtonLoading(this, () => approveApplication('${p.id}'), 'Processing…')"><i class="fas fa-check-circle"></i> ${p.source === 'dashboard-renewal' ? 'Approve Renewal' : 'Approve &amp; Create Account'}</button>
+                    <button class="btn-primary" onclick="runWithButtonLoading(this, () => approveApplication('${p.id}'), 'Processingâ€¦')"><i class="fas fa-check-circle"></i> ${p.source === 'dashboard-renewal' ? 'Approve Renewal' : 'Approve &amp; Create Account'}</button>
             </div>
         </article>
     `).join('');
@@ -1110,7 +1110,7 @@ async function loadSupabaseOperationalData(options = {}) {
                 memberId: row.member_id,
                 memberName: member?.name || 'Member',
                 username: member?.username || '',
-                plan: row.previous_plan || row.new_plan || '—',
+                plan: row.previous_plan || row.new_plan || 'â€”',
                 startDate: row.previous_start_date || '',
                 expiry: row.previous_expiry_date || '',
                 price: Number(row.previous_price) || 0,
@@ -1292,7 +1292,7 @@ function openAddMemberModal() {
         <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-user-plus"></i> Add New Member</h3>
 
         <!-- PERSONAL INFORMATION -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-user" style="color:#ff6b2b;"></i><span>Personal Information</span>
             </div>
@@ -1320,7 +1320,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- EMERGENCY CONTACT -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-phone" style="color:#ff6b2b;"></i><span>Emergency Contact</span>
             </div>
@@ -1332,7 +1332,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- MEMBERSHIP DETAILS -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-id-card" style="color:#ff6b2b;"></i><span>Membership Details</span>
             </div>
@@ -1340,17 +1340,17 @@ function openAddMemberModal() {
                 <label style="cursor:pointer; background:#11161f; border:2px solid #1e2533; border-radius:12px; padding:12px; display:block;">
                     <input type="radio" name="wiPlan" value="Monthly|800" required style="accent-color:#ff6b2b; margin-right:6px;">
                     <span style="font-weight:600; font-size:0.85rem;">Monthly</span>
-                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">₱800</div>
+                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">â‚±800</div>
                 </label>
                 <label style="cursor:pointer; background:#11161f; border:2px solid #1e2533; border-radius:12px; padding:12px; display:block;">
                     <input type="radio" name="wiPlan" value="Half Month|400" style="accent-color:#ff6b2b; margin-right:6px;">
                     <span style="font-weight:600; font-size:0.85rem;">Half Month</span>
-                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">₱400</div>
+                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">â‚±400</div>
                 </label>
                 <label style="cursor:pointer; background:#11161f; border:2px solid #1e2533; border-radius:12px; padding:12px; display:block;">
                     <input type="radio" name="wiPlan" value="Walk-in|80" style="accent-color:#ff6b2b; margin-right:6px;">
                     <span style="font-weight:600; font-size:0.85rem;">Walk-in</span>
-                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">₱80/day</div>
+                    <div style="font-size:1rem; font-weight:700; color:#ff6b2b; margin-top:4px;">â‚±80/day</div>
                 </label>
             </div>
             <div class="form-row">
@@ -1360,7 +1360,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- HEALTH & GOAL -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-heartbeat" style="color:#ff6b2b;"></i><span>Health Declaration &amp; Fitness Goal</span>
             </div>
@@ -1387,7 +1387,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- DIGITAL SIGNATURE -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-signature" style="color:#ff6b2b;"></i><span>Digital Signature</span>
             </div>
@@ -1402,7 +1402,7 @@ function openAddMemberModal() {
         </div>
 
         <!-- MEMBER PORTAL ACCOUNT -->
-        <div style="background:#0d1219; border:1px solid #1e2533; border-radius:14px; padding:18px; margin-bottom:16px;">
+        <div class="admin-add-member-section">
             <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #1e2533;">
                 <i class="fas fa-key" style="color:#ff6b2b;"></i><span>Member Portal Account</span>
             </div>
@@ -1415,11 +1415,13 @@ function openAddMemberModal() {
         </div>
 
         <!-- ACTIONS -->
-        <div class="modal-actions" style="position:sticky; bottom:0; background:#11161f; padding-top:12px;">
+        <div class="modal-actions admin-add-member-actions">
             <button class="btn-sm" onclick="closeModal()">Cancel</button>
-            <button class="btn-primary" onclick="runWithButtonLoading(this, submitNewMember, 'Creating member…')"><i class="fas fa-check"></i> Add Member &amp; Generate QR</button>
+            <button class="btn-primary" onclick="runWithButtonLoading(this, submitNewMember, 'Creating memberâ€¦')"><i class="fas fa-check"></i> Add Member &amp; Generate QR</button>
         </div>
     `);
+
+    document.getElementById('modalContent').classList.add('admin-add-member-modal');
 
     setupPhMobileInput(document.getElementById('wiContact'));
     setupPhMobileInput(document.getElementById('wiEcContact'));
@@ -1579,12 +1581,12 @@ function openChangePlanModal(id) {
     openModal(`<h3><i class="fas fa-exchange-alt"></i> Change Membership Plan</h3>
         <p class="modal-sub">Changing ${escapeHTML(member.name)} from <strong>${escapeHTML(member.plan || 'No plan')}</strong>. The new plan starts today and replaces the current expiry; the previous plan and dates will be kept in the archive. The previous payment is non-refundable, including unused days.</p>
         <div class="form-group" style="margin-bottom:14px;"><label>New Plan</label><select id="changePlanSelect" onchange="updatePlanChangePrice()">
-            <option value="Monthly" data-days="30" data-price="800">Monthly — ₱800 / 30 days</option>
-            <option value="Half Month" data-days="15" data-price="400">Half Month — ₱400 / 15 days</option>
-            <option value="Walk-in" data-days="1" data-price="80">Walk-in — ₱80 / day</option>
+            <option value="Monthly" data-days="30" data-price="800">Monthly â€” â‚±800 / 30 days</option>
+            <option value="Half Month" data-days="15" data-price="400">Half Month â€” â‚±400 / 15 days</option>
+            <option value="Walk-in" data-days="1" data-price="80">Walk-in â€” â‚±80 / day</option>
         </select></div>
-        <div class="form-group"><label>New Plan Charge (₱)</label><input type="number" id="changePlanPrice" min="0" step="0.01" placeholder="Enter amount"></div>
-        <p style="font-size:0.75rem; color:#8b95a9;">Previous plan: ${escapeHTML(member.plan || '—')} · Expires ${escapeHTML(member.expiry || '—')}</p>
+        <div class="form-group"><label>New Plan Charge (â‚±)</label><input type="number" id="changePlanPrice" min="0" step="0.01" placeholder="Enter amount"></div>
+        <p style="font-size:0.75rem; color:#8b95a9;">Previous plan: ${escapeHTML(member.plan || 'â€”')} Â· Expires ${escapeHTML(member.expiry || 'â€”')}</p>
         <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="submitMemberPlanChange('${encodeURIComponent(String(member.id))}')"><i class="fas fa-archive"></i> Save Change &amp; Archive</button></div>`);
     updatePlanChangePrice();
 }
@@ -1638,7 +1640,7 @@ async function submitMemberPlanChange(encodedId) {
         return;
     }
     const previous = {
-        plan: member.plan || '—',
+        plan: member.plan || 'â€”',
         startDate: member.startDate || null,
         expiry: member.expiry || null,
         planPrice: Number(member.planPrice || getPlanPrice(member.plan, member)) || 0
@@ -1707,11 +1709,11 @@ function renewMember(id) {
             <div class="form-group"><label for="crContact">Contact Number *</label><input type="tel" id="crContact" value="${escapeHTML(member.contact || '')}" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel" required></div>
         </div>
         <div class="form-group"><label for="crPlan">Membership Plan</label><select id="crPlan">
-            <option value="Monthly|800" ${selectedPlan === 'Monthly' ? 'selected' : ''}>Monthly — ₱800</option>
-            <option value="Half Month|400" ${selectedPlan === 'Half Month' ? 'selected' : ''}>Half Month — ₱400</option>
-            <option value="Walk-in|80" ${selectedPlan === 'Walk-in' ? 'selected' : ''}>Walk-in — ₱80</option>
+            <option value="Monthly|800" ${selectedPlan === 'Monthly' ? 'selected' : ''}>Monthly â€” â‚±800</option>
+            <option value="Half Month|400" ${selectedPlan === 'Half Month' ? 'selected' : ''}>Half Month â€” â‚±400</option>
+            <option value="Walk-in|80" ${selectedPlan === 'Walk-in' ? 'selected' : ''}>Walk-in â€” â‚±80</option>
         </select></div>
-        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => completeMemberRenewal('${member.id}'), 'Saving renewal…')"><i class="fas fa-coins"></i> Complete Renewal</button></div>
+        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => completeMemberRenewal('${member.id}'), 'Saving renewalâ€¦')"><i class="fas fa-coins"></i> Complete Renewal</button></div>
     `);
     setupPhMobileInput(document.getElementById('crContact'));
 }
@@ -1751,7 +1753,7 @@ async function completeMemberRenewal(id) {
         return;
     }
     const previous = {
-        plan: member.plan || '—', startDate: member.startDate || null, expiry: member.expiry || null,
+        plan: member.plan || 'â€”', startDate: member.startDate || null, expiry: member.expiry || null,
         planPrice: Number(member.planPrice || getPlanPrice(member.plan, member)) || 0
     };
     archiveExpiredMembership(member, true);
@@ -1891,21 +1893,21 @@ function showMobileAttendancePairingModal(sessionId, pairingUrl, persistent, cap
     const localOnly = pairingUrl && ['localhost', '127.0.0.1', '::1'].includes(new URL(pairingUrl).hostname);
     openModal(`<div class="qr-camera-modal">
         <h3><i class="fas fa-mobile-screen-button"></i> Connect Phone Camera</h3>
-        <p class="modal-sub">${capacityReached ? 'Pairing limit reached.' : pairingUrl ? `Scan to pair · ${persistent ? '30 days' : '10 minutes'}` : 'Create a QR to pair a phone.'}</p>
+        <p class="modal-sub">${capacityReached ? 'Pairing limit reached.' : pairingUrl ? `Scan to pair Â· ${persistent ? '30 days' : '10 minutes'}` : 'Create a QR to pair a phone.'}</p>
         ${localOnly ? '<p class="qr-camera-status">This is localhost, which phones cannot reach. Open the hosted HTTPS admin site to pair.</p>' : ''}
         ${pairingUrl ? `<div class="phone-pair-qr-shell"><div id="phonePairQr" data-session-id="${sessionId}" data-pairing-state="pending" class="phone-pair-qr" aria-label="Phone scanner pairing QR code"></div><button id="phonePairQrVisibility" class="btn-sm phone-pair-qr-visibility" type="button" onclick="togglePhonePairingQrVisibility()" aria-pressed="false"><i class="fas fa-eye-slash" aria-hidden="true"></i> Hide QR</button></div>` : ''}
-        <p id="phonePairStatus" class="qr-camera-status" role="status">${capacityReached ? 'Pairing limit reached.' : pairingUrl ? 'Waiting for phone…' : 'Ready to pair.'}</p>
+        <p id="phonePairStatus" class="qr-camera-status" role="status">${capacityReached ? 'Pairing limit reached.' : pairingUrl ? 'Waiting for phoneâ€¦' : 'Ready to pair.'}</p>
         <p id="phonePairCapacityMessage" class="qr-camera-status ${capacityReached ? '' : 'hidden'}" role="status">End a phone or pending QR to free a slot.</p>
         <div class="phone-scanner-install-action">
             <a class="scanner-install-link" href="attendance-phone.html" target="_blank" rel="noopener"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i> Open / install scanner <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
         </div>
         <div class="phone-pairing-limit-controls">
-            <p id="phonePairingLimitSummary" class="qr-camera-status">Loading…</p>
+            <p id="phonePairingLimitSummary" class="qr-camera-status">Loadingâ€¦</p>
             <button class="btn-sm" onclick="changePhonePairingLimit()">Change phone limit</button>
         </div>
         <section class="paired-phones-section" aria-labelledby="pairedPhonesHeading">
             <h4 id="pairedPhonesHeading">Paired phones <span id="pairedPhonesCount" class="paired-phone-count">0</span></h4>
-            <div id="pairedPhonesList" class="paired-phone-list"><p class="paired-phone-empty">Loading paired phones…</p></div>
+            <div id="pairedPhonesList" class="paired-phone-list"><p class="paired-phone-empty">Loading paired phonesâ€¦</p></div>
         </section>
         <section class="paired-phones-section pending-phone-pairings" aria-labelledby="pendingPhonePairingsHeading">
             <h4 id="pendingPhonePairingsHeading">Pending QR codes <span id="pendingPhonePairingsCount" class="paired-phone-count">0</span></h4>
@@ -2079,9 +2081,9 @@ function renderPhonePairingSettings(data) {
     const paired = Number(data.paired_count || 0);
     const reserved = Number(data.pending_count || 0);
     const available = Math.max(0, Number(data.max_pairs) - paired - reserved);
-    if (summary) summary.textContent = `${paired} ${paired === 1 ? 'phone' : 'phones'} paired · ${reserved} ${reserved === 1 ? 'QR' : 'QRs'} reserved · ${available} ${available === 1 ? 'slot' : 'slots'} available`;
+    if (summary) summary.textContent = `${paired} ${paired === 1 ? 'phone' : 'phones'} paired Â· ${reserved} ${reserved === 1 ? 'QR' : 'QRs'} reserved Â· ${available} ${available === 1 ? 'slot' : 'slots'} available`;
     const limit = document.getElementById('pairedPhonesLimit');
-    if (limit) limit.textContent = `Limit: ${data.max_pairs} · ${reserved} ${reserved === 1 ? 'QR' : 'QRs'} reserved`;
+    if (limit) limit.textContent = `Limit: ${data.max_pairs} Â· ${reserved} ${reserved === 1 ? 'QR' : 'QRs'} reserved`;
     const count = document.getElementById('activePhoneSessionCount');
     if (count) count.textContent = String(data.active_count);
 }
@@ -2150,7 +2152,7 @@ async function authorizePhonePairingLimit(event) {
 function startMobileAttendancePolling(sessionId) {
     mobileAttendanceSessionIds.add(sessionId);
     savePersistentMobileAttendanceSessions();
-    setAttendancePhoneStatus('Pairing QR ready. Waiting for a phone to connect…');
+    setAttendancePhoneStatus('Pairing QR ready. Waiting for a phone to connectâ€¦');
     if (!mobileAttendancePollTimer) {
         mobileAttendancePollTimer = window.setInterval(() => {
             for (const activeSessionId of mobileAttendanceSessionIds) pollMobileAttendanceScans(activeSessionId);
@@ -2214,7 +2216,7 @@ async function refreshPairedAttendancePhones(force = false) {
     if (document.getElementById('pairedPhonesList') !== list) return;
     if (error) {
         const count = document.getElementById('pairedPhonesCount');
-        if (count) count.textContent = '—';
+        if (count) count.textContent = 'â€”';
         list.innerHTML = `<p class="paired-phone-empty">Could not load paired phones: ${escapeHTML(error.message)}. Apply migration 20261104000012.</p>`;
         return;
     }
@@ -2235,15 +2237,15 @@ async function refreshPairedAttendancePhones(force = false) {
     if (modalStatus && !modalStatus.textContent.startsWith('Last scan processed') && !modalStatus.textContent.startsWith('Phone connection issue')) {
         const currentPhone = phones.find(phone => phone.session_id === activeMobileAttendanceSessionId);
         if (currentPhone?.paired !== false && currentPhone) {
-            modalStatus.textContent = 'Connected · ready to scan.';
+            modalStatus.textContent = 'Connected Â· ready to scan.';
         } else if (currentPhone) {
-            modalStatus.textContent = 'Waiting for phone…';
+            modalStatus.textContent = 'Waiting for phoneâ€¦';
         } else if (!document.getElementById('phonePairQr') && !pairingSettingsError && Number(pairingSettings?.active_count) >= Number(pairingSettings?.max_pairs)) {
             modalStatus.textContent = 'Pairing limit reached.';
         } else if (phones.length) {
-            modalStatus.textContent = 'Waiting for phone…';
+            modalStatus.textContent = 'Waiting for phoneâ€¦';
         } else {
-            modalStatus.textContent = 'Waiting for phone…';
+            modalStatus.textContent = 'Waiting for phoneâ€¦';
         }
     }
     if (!phones.length) {
@@ -2332,13 +2334,13 @@ async function refreshAttendancePhoneStatus(sessionId) {
         return;
     }
     if (!data?.paired) {
-    setPhonePairingModalStatus('Pairing QR ready. Waiting for a phone to connect…');
+    setPhonePairingModalStatus('Pairing QR ready. Waiting for a phone to connectâ€¦');
         return;
     }
     const pairedTime = data.paired_at
         ? new Date(data.paired_at).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' })
         : '';
-    const message = `Paired phone: ${data.device || 'Phone'}${pairedTime ? ` · connected ${pairedTime}` : ''}`;
+    const message = `Paired phone: ${data.device || 'Phone'}${pairedTime ? ` Â· connected ${pairedTime}` : ''}`;
     setAttendancePhoneStatus(message, true);
     const modalStatus = document.getElementById('phonePairStatus');
     if (modalStatus && !modalStatus.textContent.startsWith('Last scan processed')) modalStatus.textContent = message;
@@ -2461,10 +2463,10 @@ function startLocalQRScanner() {
             <div id="qrScanProcessing" class="qr-scan-processing" hidden role="status" aria-live="polite">
                 <span class="qr-scan-spinner" aria-hidden="true"><i class="fas fa-qrcode"></i></span>
                 <strong>Recording attendance</strong>
-                <span>Checking whether this member is entering or leaving…</span>
+                <span>Checking whether this member is entering or leavingâ€¦</span>
             </div>
         </div>
-        <p id="qrCameraStatus" class="qr-camera-status" role="status">Starting camera…</p>
+        <p id="qrCameraStatus" class="qr-camera-status" role="status">Starting cameraâ€¦</p>
         <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button></div>
     </div>`);
 
@@ -2482,9 +2484,9 @@ function startLocalQRScanner() {
                 const heading = processing.querySelector('strong');
                 const detail = processing.querySelector('span:not(.qr-scan-spinner)');
                 if (heading) heading.textContent = 'Looking up member';
-                if (detail) detail.textContent = 'Checking the QR code with the member records…';
+                if (detail) detail.textContent = 'Checking the QR code with the member recordsâ€¦';
             }
-            if (status) status.textContent = 'QR detected. Looking up member…';
+            if (status) status.textContent = 'QR detected. Looking up memberâ€¦';
 
             let member;
             try {
@@ -2514,11 +2516,11 @@ function startLocalQRScanner() {
                 const heading = processing.querySelector('strong');
                 const detail = processing.querySelector('span:not(.qr-scan-spinner)');
                 if (heading) heading.textContent = openVisit ? 'Checking out' : 'Checking in';
-                if (detail) detail.textContent = `${member.name} — attendance is being updated.`;
+                if (detail) detail.textContent = `${member.name} â€” attendance is being updated.`;
             }
             if (status) status.textContent = openVisit
-                ? 'Open visit found. Checking out…'
-                : 'No open visit found. Checking in…';
+                ? 'Open visit found. Checking outâ€¦'
+                : 'No open visit found. Checking inâ€¦';
             await new Promise(resolve => window.setTimeout(resolve, 350));
             closeModal();
             await recordMemberAttendanceScan(member);
@@ -2560,7 +2562,7 @@ function startLocalQRScanner() {
     clearTimeout(qrCameraHintTimer);
     qrCameraHintTimer = window.setTimeout(() => {
         const status = document.getElementById('qrCameraStatus');
-        if (status?.textContent === 'Starting camera…') {
+        if (status?.textContent === 'Starting cameraâ€¦') {
             status.textContent = 'Waiting for browser camera permission. If no prompt appeared, allow Camera for this site in browser settings and try again.';
         }
     }, 8000);
@@ -2569,7 +2571,7 @@ function startLocalQRScanner() {
         clearTimeout(qrCameraHintTimer);
         qrCameraHintTimer = null;
         const status = document.getElementById('qrCameraStatus');
-        if (status) status.textContent = 'Camera is on. Point it at the member’s QR code.';
+        if (status) status.textContent = 'Camera is on. Point it at the memberâ€™s QR code.';
     }).catch(error => {
         clearTimeout(qrCameraHintTimer);
         qrCameraHintTimer = null;
@@ -2685,7 +2687,7 @@ async function recordMemberAttendanceScan(member) {
     }
 
     if (member.expiry && member.expiry < todayStr()) {
-        toast('Membership is expired. Check the member’s renewal status.', 'error');
+        toast('Membership is expired. Check the memberâ€™s renewal status.', 'error');
         return;
     }
     const today = todayStr();
@@ -2737,7 +2739,7 @@ async function unlockStore() {
         return;
     }
 
-    status.textContent = 'Checking password…';
+    status.textContent = 'Checking passwordâ€¦';
     const { data, error } = await client.functions.invoke('verify-store-password', {
         body: { password },
     });
@@ -2801,7 +2803,7 @@ function productCard(p) {
     const supplement = p.category === 'Supplement';
     const photo = catalogProductPhoto(p);
     const merchType = p.merchType || (p.size ? 'apparel' : 'other');
-    const productType = supplement ? `${supplementTypeLabel(p.supplementType || 'other')} · ${supplementFormLabel(p.supplementForm || 'powder')}` : merchandiseTypeLabel(merchType);
+    const productType = supplement ? `${supplementTypeLabel(p.supplementType || 'other')} Â· ${supplementFormLabel(p.supplementForm || 'powder')}` : merchandiseTypeLabel(merchType);
     const merchVariant = !supplement && p.size ? `Size ${p.size}` : '';
     const low = productIsLowStock(p);
     const stock = productStockInSaleUnits(p);
@@ -2810,14 +2812,14 @@ function productCard(p) {
     const thresholdLabel = `${Number(threshold.toFixed(3)).toLocaleString('en-PH')} ${stockUnitLabel(p.stockUnit || 'item')}`;
     const quote = productPriceQuote(p.price, p.inventoryUnit);
     const conversion = supplement && p.stockUnit !== p.inventoryUnit && ['gram', 'milliliter'].includes(p.inventoryUnit)
-        ? `≈ ${Number(stock.toFixed(2)).toLocaleString('en-PH')} ${stockUnitLabel(p.inventoryUnit)}` : '';
+        ? `â‰ˆ ${Number(stock.toFixed(2)).toLocaleString('en-PH')} ${stockUnitLabel(p.inventoryUnit)}` : '';
     return `
         <div class="product-card inventory-product-card">
             ${photo ? `<div class="product-img-wrap"><img src="${escapeHTML(photo)}" alt="${escapeHTML(p.name)}" loading="lazy"></div>` : ''}
             <div class="inventory-card-top"><span class="cat">${escapeHTML(productType)}</span>${merchVariant ? `<span class="inventory-variant-badge">${escapeHTML(merchVariant)}</span>` : ''}<span class="inventory-status ${stock <= 0 ? 'out' : low ? 'low' : 'available'}">${stock <= 0 ? 'Out of stock' : low ? 'Low stock' : 'In stock'}</span></div>
-            <h4 title="${escapeHTML(`${p.name}${merchVariant ? ` — ${merchVariant}` : ''}`)}">${escapeHTML(p.name)}</h4>
+            <h4 title="${escapeHTML(`${p.name}${merchVariant ? ` â€” ${merchVariant}` : ''}`)}">${escapeHTML(p.name)}</h4>
             <div class="inventory-price"><span class="inventory-field-label">Selling price</span><strong>${formatPeso(quote.amount)}</strong><span>per ${escapeHTML(String(quote.quantity))} ${escapeHTML(productSaleUnitLabel(p))}</span></div>
-            <div class="inventory-stock-block"><span class="inventory-field-label">Stock on hand</span><strong>${escapeHTML(stockLabel)}</strong>${conversion ? `<span>${escapeHTML(conversion)}</span>` : ''}<small>Low-stock alert: ≤ ${escapeHTML(thresholdLabel)}</small></div>
+            <div class="inventory-stock-block"><span class="inventory-field-label">Stock on hand</span><strong>${escapeHTML(stockLabel)}</strong>${conversion ? `<span>${escapeHTML(conversion)}</span>` : ''}<small>Low-stock alert: â‰¤ ${escapeHTML(thresholdLabel)}</small></div>
             <div class="product-actions">
                 <button class="btn-restock" onclick="restockProduct('${p.id}')">Restock</button>
                 <button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button>
@@ -2842,7 +2844,7 @@ function restockProduct(id) {
         <h3><i class="fas fa-boxes-stacked"></i> Restock ${escapeHTML(product.name)}</h3>
         <p class="modal-sub">Current stock: ${escapeHTML(formatProductStock(product))}. Choose the unit for the quantity being added.</p>
         <div class="form-row" style="margin-bottom:14px;"><div class="form-group"><label for="rsQuantity">Quantity to add</label><input type="number" id="rsQuantity" min="0.001" step="${isDiscreteUnit(currentUnit) ? '1' : '0.001'}" placeholder="Enter quantity"></div><div class="form-group"><label for="rsUnit">Unit</label><select id="rsUnit" onchange="updateRestockQuantityInput()">${compatibleUnits.map(([value, label]) => `<option value="${value}"${value === currentUnit ? ' selected' : ''}>${label}</option>`).join('')}</select></div></div>
-        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => submitRestock('${product.id}'), 'Adding stock…')">Add stock</button></div>
+        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => submitRestock('${product.id}'), 'Adding stockâ€¦')">Add stock</button></div>
     `);
 }
 
@@ -2947,17 +2949,17 @@ function openAddProductModal() {
     openModal(`
         <h3><i class="fas fa-plus"></i> Add Product</h3>
         ${productPhotoPicker('ap')}
-        <div class="form-group" style="margin-bottom:14px;"><label>Name</label><input type="text" id="apName" placeholder="Whey Protein — Vanilla"></div>
+        <div class="form-group" style="margin-bottom:14px;"><label>Name</label><input type="text" id="apName" placeholder="Whey Protein â€” Vanilla"></div>
         <div class="form-group" style="margin-bottom:14px;"><label>Category</label><select id="apCat" onchange="toggleAddProductSize()"><option value="Supplement">Supplement</option><option value="Merch">Merchandise</option></select></div>
         <div id="apMerchTypeGroup" class="form-group" style="margin-bottom:14px;display:none"><label for="apMerchType">Merchandise type</label><select id="apMerchType" onchange="toggleAddProductSize()">${merchandiseTypeOptions()}</select></div>
         <div id="apSupplementTypeGroup" class="form-group" style="margin-bottom:14px;"><label for="apSupplementType">Supplement type</label><select id="apSupplementType">${supplementTypeOptions()}</select></div>
         <div id="apSupplementFormGroup" class="form-group" style="margin-bottom:14px;"><label for="apSupplementForm">Form</label><select id="apSupplementForm" onchange="toggleAddProductSize()">${supplementFormOptions()}</select></div>
         <div id="apSizeGroup" class="form-group" style="margin-bottom:14px;display:none"><label for="apSize">Size / variant (optional)</label><input id="apSize" list="apSizeSuggestions" maxlength="30" placeholder="Choose or type an available size"><datalist id="apSizeSuggestions">${merchandiseSizeOptions()}</datalist></div>
         <div class="form-row">
-            <div class="form-group"><label for="apPrice">Price (₱)</label><input type="number" id="apPrice" min="0.01" step="0.01" placeholder="e.g. 80"><label for="apPriceQuantity">For this quantity (<span id="apPriceUnit">g</span>)</label><input type="number" id="apPriceQuantity" min="0.001" step="0.001" value="10"><small>Example: ₱80 for 10 g. Checkout uses the equivalent unit price.</small></div>
+            <div class="form-group"><label for="apPrice">Price (â‚±)</label><input type="number" id="apPrice" min="0.01" step="0.01" placeholder="e.g. 80"><label for="apPriceQuantity">For this quantity (<span id="apPriceUnit">g</span>)</label><input type="number" id="apPriceQuantity" min="0.001" step="0.001" value="10"><small>Example: â‚±80 for 10 g. Checkout uses the equivalent unit price.</small></div>
             <div class="form-group"><label>Starting stock</label><div class="form-row"><input type="number" id="apStock" min="0" step="0.001" placeholder="Enter available stock"><select id="apStockUnit" aria-label="Stock unit" onchange="convertInventoryUnit(this, 'apStock')"><option value="gram">g</option><option value="kilogram">kg</option><option value="ounce">oz</option><option value="pound">lb</option></select></div><small id="apStockHint">Stock is tracked and deducted in grams sold.</small></div>
         </div>
-        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, submitAddProduct, 'Adding product…')">Add</button></div>
+        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, submitAddProduct, 'Adding productâ€¦')">Add</button></div>
     `);
 }
 
@@ -3058,7 +3060,7 @@ async function submitAddProduct() {
     closeModal();
     renderStore();
     renderDashboard();
-    toast(`✅ Added ${name}.`, 'success');
+    toast(`âœ… Added ${name}.`, 'success');
 }
 
 function editProduct(id) {
@@ -3071,10 +3073,10 @@ function editProduct(id) {
         <div class="form-group" style="margin-bottom:14px;"><label>Name</label><input type="text" id="epName" value="${p.name}"></div>
         ${p.category === 'Merch' ? `<div class="form-group" style="margin-bottom:14px;"><label for="epMerchType">Merchandise type</label><select id="epMerchType" onchange="toggleEditProductSize('${p.id}')">${merchandiseTypeOptions()}</select></div><div id="epSizeGroup" class="form-group" style="margin-bottom:14px;"><label for="epSize">Size / variant (optional)</label><input id="epSize" list="epSizeSuggestions" maxlength="30" placeholder="Choose or type an available size"><datalist id="epSizeSuggestions">${merchandiseSizeOptions(p.size)}</datalist></div>` : `<div class="form-group" style="margin-bottom:14px;"><label for="epSupplementType">Supplement type</label><select id="epSupplementType">${supplementTypeOptions()}</select></div><div class="form-group" style="margin-bottom:14px;"><label for="epSupplementForm">Form</label><select id="epSupplementForm" onchange="toggleEditSupplementUnits()">${supplementFormOptions(p.supplementForm || 'powder')}</select></div>`}
         <div class="form-row">
-            <div class="form-group"><label for="epPrice">Price (₱)</label><input type="number" id="epPrice" min="0.01" step="0.01" value="${productPriceQuote(p.price, p.inventoryUnit).amount}"><label for="epPriceQuantity">For this quantity (<span id="epPriceUnit">${productSaleUnitLabel(p)}</span>)</label><input type="number" id="epPriceQuantity" min="0.001" step="0.001" value="${productPriceQuote(p.price, p.inventoryUnit).quantity}"><small>Edit the price and quantity separately. Checkout uses the equivalent unit price.</small></div>
+            <div class="form-group"><label for="epPrice">Price (â‚±)</label><input type="number" id="epPrice" min="0.01" step="0.01" value="${productPriceQuote(p.price, p.inventoryUnit).amount}"><label for="epPriceQuantity">For this quantity (<span id="epPriceUnit">${productSaleUnitLabel(p)}</span>)</label><input type="number" id="epPriceQuantity" min="0.001" step="0.001" value="${productPriceQuote(p.price, p.inventoryUnit).quantity}"><small>Edit the price and quantity separately. Checkout uses the equivalent unit price.</small></div>
             <div class="form-group"><label>Current stock</label><div class="form-row"><input type="number" id="epStock" min="0" step="${stockStep(p.stockUnit || 'item')}" value="${Number(p.stock) || 0}"><select id="epStockUnit" aria-label="Stock unit" onchange="convertInventoryUnit(this, 'epStock')">${p.category === 'Supplement' ? stockUnitOptions(p.supplementForm || 'powder', p.stockUnit) : stockUnitOptions('item', 'item')}</select></div><small id="epStockHint">${isDiscreteUnit(p.inventoryUnit) ? `Each sale deducts one ${saleUnitLabel(p.inventoryUnit)}.` : `Sales deduct in ${saleUnitLabel(p.inventoryUnit)}.`}</small></div>
         </div>
-        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => submitEditProduct('${p.id}'), 'Saving…')">Save</button></div>
+        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => submitEditProduct('${p.id}'), 'Savingâ€¦')">Save</button></div>
     `);
     const stockUnit = document.getElementById('epStockUnit');
     stockUnit.value = p.stockUnit || (p.category === 'Supplement' ? 'gram' : 'item');
@@ -3175,7 +3177,7 @@ async function submitEditProduct(id) {
     closeModal();
     renderStore();
     renderDashboard();
-    toast(`✅ Updated ${p.name}.`, 'success');
+    toast(`âœ… Updated ${p.name}.`, 'success');
 }
 
 function previewProductPhoto(input, previewId) {
@@ -3265,12 +3267,12 @@ function openNewSaleModal() {
         <h3><i class="fas fa-cash-register"></i> New Sale</h3>
         <div class="form-group" style="margin-bottom:14px;"><label for="nsCustomer">Customer name</label><input type="text" id="nsCustomer" placeholder="Enter customer name" required></div>
         <div class="form-group" style="margin-bottom:14px;"><label>Product</label><select id="nsProduct" onchange="updateSaleQuantityMode()">
-            ${available.map(p => `<option value="${p.id}">${p.name}${p.category === 'Merch' && p.size ? ' (' + p.size + ')' : ''} — ${formatPeso(p.price)} / ${productSaleUnitLabel(p)}</option>`).join('')}
+            ${available.map(p => `<option value="${p.id}">${p.name}${p.category === 'Merch' && p.size ? ' (' + p.size + ')' : ''} â€” ${formatPeso(p.price)} / ${productSaleUnitLabel(p)}</option>`).join('')}
         </select></div>
         <div class="form-row" style="margin-bottom:14px;"><div class="form-group"><label id="nsQtyLabel" for="nsQty">Quantity</label><input type="number" id="nsQty" value="1" min="0.01" step="0.01" oninput="updateSaleTotalPreview()"></div><div class="form-group"><label for="nsUnit">Sell by</label><select id="nsUnit" onchange="updateSaleQuantityMode()"></select></div></div>
         <p class="modal-sub" id="nsPriceHint"></p>
-        <div class="sale-total-preview">Sale total <strong id="nsTotalPreview">₱0</strong></div>
-        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, submitNewSale, 'Recording sale…')">Complete</button></div>
+        <div class="sale-total-preview">Sale total <strong id="nsTotalPreview">â‚±0</strong></div>
+        <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, submitNewSale, 'Recording saleâ€¦')">Complete</button></div>
     `);
     updateSaleQuantityMode();
 }
@@ -3308,7 +3310,7 @@ function updateSaleQuantityMode() {
     unitSelect.dataset.previousUnit = saleUnit;
     const unitPrice = product.price * factor;
     document.getElementById('nsQtyLabel').textContent = fractional ? `Amount to sell (${unitLabel})` : 'Quantity';
-    document.getElementById('nsPriceHint').textContent = `${formatPeso(unitPrice)} per ${unitLabel} · ${available.toLocaleString('en-PH')} ${unitLabel} available`;
+    document.getElementById('nsPriceHint').textContent = `${formatPeso(unitPrice)} per ${unitLabel} Â· ${available.toLocaleString('en-PH')} ${unitLabel} available`;
     updateSaleTotalPreview();
 }
 
@@ -3399,7 +3401,7 @@ async function submitNewSale() {
     renderSales();
     renderDashboard();
     renderWalkinSalesReport();
-    toast(`✅ Sale complete — ${formatPeso(sale.total)}.`, 'success');
+    toast(`âœ… Sale complete â€” ${formatPeso(sale.total)}.`, 'success');
 }
 
 function switchSalesView(view) {
@@ -3557,7 +3559,7 @@ function renderSales() {
     const currentMonthIncome = currentMonthPaidSales.reduce((sum, sale) => sum + (Number(sale.total) || 0), 0);
     const currentMonthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
         .format(new Date(`${currentMonth}-01T00:00:00`));
-    document.getElementById('salesMonthOverview').innerHTML = `<div class="sales-month-overview-copy"><span>This month · ${currentMonthLabel}</span><h3>Overall income</h3><p>Memberships: ${currentMonthPaidMembershipCount} paid sales · Products: ${currentMonthPaidProductCount} paid sales</p></div><strong class="sales-month-overview-total">${formatPeso(currentMonthIncome)}</strong>`;
+    document.getElementById('salesMonthOverview').innerHTML = `<div class="sales-month-overview-copy"><span>This month Â· ${currentMonthLabel}</span><h3>Overall income</h3><p>Memberships: ${currentMonthPaidMembershipCount} paid sales Â· Products: ${currentMonthPaidProductCount} paid sales</p></div><strong class="sales-month-overview-total">${formatPeso(currentMonthIncome)}</strong>`;
     const salesByType = { membership: membershipSalesInPeriod, products: productSales };
     const typedSales = salesByType[currentSalesTransactionType] || [];
     const planOptions = [...new Set(membershipSalesInPeriod.map(getMembershipPlanFromSale))].sort((a, b) => {
@@ -3676,7 +3678,7 @@ function archiveExpiredMembership(member, renewed = false) {
         memberId: member.id,
         memberName: member.name,
         username: member.username || '',
-        plan: member.plan || '—',
+        plan: member.plan || 'â€”',
         startDate: member.startDate || '',
         expiry: member.expiry,
         price: Number(member.planPrice || getPlanPrice(member.plan, member)) || 0,
@@ -3825,9 +3827,9 @@ function refreshReportSummary() {
         document.getElementById('reportsSummarySalesCount').textContent = `${periodSales.length} recorded ${periodSales.length === 1 ? 'transaction' : 'transactions'}`;
         document.getElementById('reportsSummaryAttendance').textContent = visits.toLocaleString('en-PH');
     } catch (error) {
-        salesValue.textContent = '—';
+        salesValue.textContent = 'â€”';
         document.getElementById('reportsSummarySalesCount').textContent = error.message;
-        document.getElementById('reportsSummaryAttendance').textContent = '—';
+        document.getElementById('reportsSummaryAttendance').textContent = 'â€”';
     }
 }
 
@@ -3937,7 +3939,7 @@ function getRenewalPlan(sale) {
     const recordedPlan = text.replace(/\s+membership\s+renewal$/i, '').replace(/\s+renewal$/i, '');
     if (recordedPlan) return recordedPlan;
     const member = members.find(item => String(item.id) === String(sale.memberId));
-    return member?.plan || '—';
+    return member?.plan || 'â€”';
 }
 
 function getRenewalReportRows() {
@@ -4000,14 +4002,14 @@ function viewReport(type) {
     if (type === 'membership') {
         const currentMembers = members.filter(member => !isPastMembershipArchiveGrace(member));
         body = `<table class="attendance-table"><thead><tr><th>Name</th><th>Plan</th><th>Started</th><th>Expires</th></tr></thead><tbody>
-            ${currentMembers.map(m => `<tr><td>${m.name}</td><td>${m.plan}</td><td>${m.startDate || '—'}</td><td>${m.expiry}</td></tr>`).join('')}</tbody></table>`;
+            ${currentMembers.map(m => `<tr><td>${m.name}</td><td>${m.plan}</td><td>${m.startDate || 'â€”'}</td><td>${m.expiry}</td></tr>`).join('')}</tbody></table>`;
     } else if (type === 'member-status') {
         const activeMembers = members.filter(member => getMemberActivityStatus(member) === 'Active');
         const expiredMembers = members.filter(member => getMemberActivityStatus(member) === 'Expired');
         const inactiveMembers = members.filter(member => getMemberActivityStatus(member) === 'Inactive');
         const statusTable = (items, status) => `<h4 style="margin:18px 0 8px; color:${status === 'Active' ? '#2ecc71' : '#ff6b6b'};">${status} Members (${items.length})</h4>
             <table class="attendance-table"><thead><tr><th>Name</th><th>Registration Source</th><th>Plan</th><th>Expires</th></tr></thead><tbody>
-            ${items.map(member => `<tr><td>${escapeHTML(member.name)}</td><td>${escapeHTML(member.registrationSource || 'Not recorded')}</td><td>${escapeHTML(member.plan || '—')}</td><td>${escapeHTML(member.expiry || '—')}</td></tr>`).join('') || '<tr><td colspan="4">No members in this group.</td></tr>'}</tbody></table>`;
+            ${items.map(member => `<tr><td>${escapeHTML(member.name)}</td><td>${escapeHTML(member.registrationSource || 'Not recorded')}</td><td>${escapeHTML(member.plan || 'â€”')}</td><td>${escapeHTML(member.expiry || 'â€”')}</td></tr>`).join('') || '<tr><td colspan="4">No members in this group.</td></tr>'}</tbody></table>`;
         body = `<p class="modal-sub">Expired memberships remain in the five-day renewal window. After that, records without a pending renewal are tracked as inactive.</p>
             ${statusTable(activeMembers, 'Active')}${statusTable(expiredMembers, 'Expired')}${statusTable(inactiveMembers, 'Inactive')}`;
     } else if (type === 'archives') {
@@ -4015,25 +4017,25 @@ function viewReport(type) {
         const archivedPlans = [...planArchives].sort((a, b) => String(b.changedAt || '').localeCompare(String(a.changedAt || '')));
         const expiredMembers = membershipArchives.filter(isMembershipArchiveReady).sort((a, b) => String(b.expiry || '').localeCompare(String(a.expiry || '')));
         const expiredTable = expiredMembers.length
-            ? `<table class="attendance-table"><thead><tr><th>Member</th><th>Plan</th><th>Started</th><th>Expired</th><th>Fee</th></tr></thead><tbody>${expiredMembers.map(record => `<tr><td>${escapeHTML(record.memberName)}</td><td>${escapeHTML(record.plan)}</td><td>${escapeHTML(record.startDate || '—')}</td><td>${escapeHTML(record.expiry)}</td><td>${formatPeso(record.price)}</td></tr>`).join('')}</tbody></table>`
+            ? `<table class="attendance-table"><thead><tr><th>Member</th><th>Plan</th><th>Started</th><th>Expired</th><th>Fee</th></tr></thead><tbody>${expiredMembers.map(record => `<tr><td>${escapeHTML(record.memberName)}</td><td>${escapeHTML(record.plan)}</td><td>${escapeHTML(record.startDate || 'â€”')}</td><td>${escapeHTML(record.expiry)}</td><td>${formatPeso(record.price)}</td></tr>`).join('')}</tbody></table>`
             : '<div class="empty-state">No expired subscriptions have been archived.</div>';
         const planTable = archivedPlans.length
-            ? `<table class="attendance-table"><thead><tr><th>Member</th><th>Previous Plan</th><th>New Plan</th><th>Previous Expiry</th><th>New Expiry</th><th>Previous Fee</th><th>New Fee</th><th>Changed</th></tr></thead><tbody>${archivedPlans.map(record => `<tr><td>${escapeHTML(record.memberName)}</td><td>${escapeHTML(record.previousPlan)}</td><td>${escapeHTML(record.newPlan)}</td><td>${escapeHTML(record.previousExpiry || '—')}</td><td>${escapeHTML(record.newExpiry || '—')}</td><td>${formatPeso(record.previousPrice || 0)}</td><td>${formatPeso(record.newPrice || 0)}</td><td>${escapeHTML(record.changedAt ? new Date(record.changedAt).toLocaleString() : '—')}</td></tr>`).join('')}</tbody></table>`
+            ? `<table class="attendance-table"><thead><tr><th>Member</th><th>Previous Plan</th><th>New Plan</th><th>Previous Expiry</th><th>New Expiry</th><th>Previous Fee</th><th>New Fee</th><th>Changed</th></tr></thead><tbody>${archivedPlans.map(record => `<tr><td>${escapeHTML(record.memberName)}</td><td>${escapeHTML(record.previousPlan)}</td><td>${escapeHTML(record.newPlan)}</td><td>${escapeHTML(record.previousExpiry || 'â€”')}</td><td>${escapeHTML(record.newExpiry || 'â€”')}</td><td>${formatPeso(record.previousPrice || 0)}</td><td>${formatPeso(record.newPrice || 0)}</td><td>${escapeHTML(record.changedAt ? new Date(record.changedAt).toLocaleString() : 'â€”')}</td></tr>`).join('')}</tbody></table>`
             : '<div class="empty-state">No plan changes have been archived yet.</div>';
         const archivedProductRows = archivedProducts.slice().sort((a, b) => String(b.archivedAt || '').localeCompare(String(a.archivedAt || '')));
         const productTable = archivedProductRows.length
-            ? `<table class="attendance-table"><thead><tr><th>Product</th><th>Category</th><th>Size</th><th>Price</th><th>Archived</th></tr></thead><tbody>${archivedProductRows.map(product => `<tr><td>${escapeHTML(product.name)}</td><td>${escapeHTML(product.category)}</td><td>${escapeHTML(product.size || '—')}</td><td>${formatPeso(product.price)} / ${productSaleUnitLabel(product)}</td><td>${escapeHTML(product.archivedAt ? new Date(product.archivedAt).toLocaleString() : '—')}</td></tr>`).join('')}</tbody></table>`
+            ? `<table class="attendance-table"><thead><tr><th>Product</th><th>Category</th><th>Size</th><th>Price</th><th>Archived</th></tr></thead><tbody>${archivedProductRows.map(product => `<tr><td>${escapeHTML(product.name)}</td><td>${escapeHTML(product.category)}</td><td>${escapeHTML(product.size || 'â€”')}</td><td>${formatPeso(product.price)} / ${productSaleUnitLabel(product)}</td><td>${escapeHTML(product.archivedAt ? new Date(product.archivedAt).toLocaleString() : 'â€”')}</td></tr>`).join('')}</tbody></table>`
             : '<div class="empty-state">No products have been archived.</div>';
         body = `<section><h4>Expired Subscriptions (${expiredMembers.length})</h4>${expiredTable}</section><section style="margin-top:24px;"><h4>Plan Changes (${archivedPlans.length})</h4><p class="modal-sub">No refunds are issued for unused time on the previous plan.</p>${planTable}</section><section style="margin-top:24px;"><h4>Archived Products (${archivedProductRows.length})</h4>${productTable}</section>`;
     } else if (type === 'payment' || type === 'sales') {
         body = `<table class="attendance-table"><thead><tr><th>Transaction reference</th><th>Customer</th><th>Total</th><th>Date</th><th>Status</th></tr></thead><tbody>
-            ${sales.map(s => `<tr><td>#${escapeHTML(s.id || '—')}</td><td>${escapeHTML(s.customer || 'Name not recorded')}</td><td>${formatPeso(s.total)}</td><td>${escapeHTML(s.date || '—')}</td><td>${escapeHTML(s.status || 'Unknown')}</td></tr>`).join('') || '<tr><td colspan="5">No payment records.</td></tr>'}</tbody></table>`;
+            ${sales.map(s => `<tr><td>#${escapeHTML(s.id || 'â€”')}</td><td>${escapeHTML(s.customer || 'Name not recorded')}</td><td>${formatPeso(s.total)}</td><td>${escapeHTML(s.date || 'â€”')}</td><td>${escapeHTML(s.status || 'Unknown')}</td></tr>`).join('') || '<tr><td colspan="5">No payment records.</td></tr>'}</tbody></table>`;
     } else if (type === 'renewals') {
         const renewals = getRenewalReportRows();
         const income = renewals.reduce((total, sale) => total + (sale.saleRecorded === false ? 0 : Number(sale.total || 0)), 0);
-        body = `<p class="modal-sub">${renewals.length} completed renewal${renewals.length === 1 ? '' : 's'} · Total collected: <strong>${formatPeso(income)}</strong></p>
+        body = `<p class="modal-sub">${renewals.length} completed renewal${renewals.length === 1 ? '' : 's'} Â· Total collected: <strong>${formatPeso(income)}</strong></p>
             ${renewals.length ? `<div class="table-scroll"><table class="attendance-table"><thead><tr><th>Transaction reference</th><th>Member</th><th>Renewed Plan</th><th>Channel</th><th>Amount</th><th>Date</th><th>Payment record</th></tr></thead><tbody>
-                ${renewals.map(sale => `<tr><td>${sale.saleRecorded === false ? 'Not recorded' : `#${escapeHTML(sale.id)}`}</td><td>${escapeHTML(sale.customer || 'Name not recorded')}</td><td>${escapeHTML(getRenewalPlan(sale))}</td><td>${escapeHTML(getRenewalChannel(sale))}</td><td>${formatPeso(sale.total)}</td><td>${escapeHTML(sale.date || '—')}</td><td>${sale.saleRecorded === false ? 'Missing payment record' : 'Recorded'}</td></tr>`).join('')}
+                ${renewals.map(sale => `<tr><td>${sale.saleRecorded === false ? 'Not recorded' : `#${escapeHTML(sale.id)}`}</td><td>${escapeHTML(sale.customer || 'Name not recorded')}</td><td>${escapeHTML(getRenewalPlan(sale))}</td><td>${escapeHTML(getRenewalChannel(sale))}</td><td>${formatPeso(sale.total)}</td><td>${escapeHTML(sale.date || 'â€”')}</td><td>${sale.saleRecorded === false ? 'Missing payment record' : 'Recorded'}</td></tr>`).join('')}
             </tbody></table></div>` : '<div class="empty-state">No completed membership renewals recorded.</div>'}`;
     } else if (type === 'attendance') {
         const attendanceGroups = groupAttendanceByMonth(attendance);
@@ -4043,7 +4045,7 @@ function viewReport(type) {
                     ${escapeHTML(group.label)} <span style="float:right; color:#c4cad5;">${group.records.length} ${group.records.length === 1 ? 'visit' : 'visits'}</span>
                 </h4>
                 <table class="attendance-table"><thead><tr><th>Member</th><th>Date</th><th>In</th><th>Out</th></tr></thead><tbody>
-                    ${group.records.map(a => `<tr><td>${escapeHTML(a.memberName)}</td><td>${escapeHTML(a.date || '—')}</td><td>${escapeHTML(formatAttendanceClock(a.timeIn))}</td><td>${escapeHTML(formatAttendanceClock(a.timeOut))}</td></tr>`).join('')}
+                    ${group.records.map(a => `<tr><td>${escapeHTML(a.memberName)}</td><td>${escapeHTML(a.date || 'â€”')}</td><td>${escapeHTML(formatAttendanceClock(a.timeIn))}</td><td>${escapeHTML(formatAttendanceClock(a.timeOut))}</td></tr>`).join('')}
                 </tbody></table>
             </section>`).join('') : '<div class="empty-state">No attendance records.</div>';
     } else if (type === 'inventory') {
@@ -4266,10 +4268,10 @@ function viewReportPDF(type, inAppPreview = false, memberStatus = null, applicat
     }
     reportPreviewZoom = 110;
     openModal(`<div class="report-pdf-preview-toolbar">
-        <strong><i class="fas fa-file-pdf"></i> ${type === 'members' ? `Member Records${memberStatus && memberStatus !== 'All' ? ` — ${escapeHTML(memberStatus)}` : ''} preview` : type === 'membership-history' ? `Membership History Records${historyType && historyType !== 'All' ? ` — ${escapeHTML(membershipHistoryTypeLabel(historyType))}` : ''} preview` : type === 'membership-applications' ? `Membership Application Records${applicationType && applicationType !== 'All' ? ` — ${escapeHTML(membershipApplicationTypeLabel(applicationType))}` : ''} preview` : type === 'sales' ? `Sales Records — ${escapeHTML(salesReportTypeLabel(salesType || 'All'))} preview` : type === 'sale-items' ? `Sale Item Records — ${escapeHTML(saleItemCategoryLabel(saleItemCategory || 'All'))} preview` : 'Report preview'}</strong>
+        <strong><i class="fas fa-file-pdf"></i> ${type === 'members' ? `Member Records${memberStatus && memberStatus !== 'All' ? ` â€” ${escapeHTML(memberStatus)}` : ''} preview` : type === 'membership-history' ? `Membership History Records${historyType && historyType !== 'All' ? ` â€” ${escapeHTML(membershipHistoryTypeLabel(historyType))}` : ''} preview` : type === 'membership-applications' ? `Membership Application Records${applicationType && applicationType !== 'All' ? ` â€” ${escapeHTML(membershipApplicationTypeLabel(applicationType))}` : ''} preview` : type === 'sales' ? `Sales Records â€” ${escapeHTML(salesReportTypeLabel(salesType || 'All'))} preview` : type === 'sale-items' ? `Sale Item Records â€” ${escapeHTML(saleItemCategoryLabel(saleItemCategory || 'All'))} preview` : 'Report preview'}</strong>
         <div class="report-pdf-preview-controls">
             ${type === 'members' ? '<button class="btn-sm" type="button" onclick="chooseMemberReportStatus(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to status</button>' : type === 'membership-history' ? '<button class="btn-sm" type="button" onclick="chooseMembershipHistoryType(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to type</button>' : type === 'membership-applications' ? '<button class="btn-sm" type="button" onclick="chooseMembershipApplicationType(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to type</button>' : type === 'sales' ? '<button class="btn-sm" type="button" onclick="chooseSalesRecordType(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to sales type</button>' : type === 'sale-items' ? '<button class="btn-sm" type="button" onclick="chooseSaleItemCategory(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to item category</button>' : ''}
-            <button class="btn-sm" aria-label="Zoom out" onclick="setReportPreviewZoom(-10)">−</button>
+            <button class="btn-sm" aria-label="Zoom out" onclick="setReportPreviewZoom(-10)">âˆ’</button>
             <span id="reportPreviewZoomLabel">110%</span>
             <button class="btn-sm" aria-label="Zoom in" onclick="setReportPreviewZoom(10)">+</button>
             <button class="btn-sm" onclick="closeModal()">Close</button>
@@ -4313,12 +4315,12 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
     if (type === 'members') {
         columns = ['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'];
         rows = getMemberReportRows(selectedPeriod, memberStatus).map(member => ({
-            cells: [member.name, member.email || '—', member.plan || '—', getMemberActivityStatus(member), member.startDate || '—', member.expiry || '—']
+            cells: [member.name, member.email || 'â€”', member.plan || 'â€”', getMemberActivityStatus(member), member.startDate || 'â€”', member.expiry || 'â€”']
         }));
     } else if (type === 'membership-history') {
         columns = ['Member', 'Event', 'Previous Plan', 'New Plan', 'Previous Expiry', 'New Expiry', 'Recorded'];
         rows = reportMembershipHistory.filter(record => historyType === 'All' || record.eventType === historyType).map(record => ({
-            cells: [record.memberName, record.eventType || 'Membership update', record.previousPlan || '—', record.newPlan || '—', record.previousExpiry || '—', record.newExpiry || '—', record.changedAt || '—'],
+            cells: [record.memberName, record.eventType || 'Membership update', record.previousPlan || 'â€”', record.newPlan || 'â€”', record.previousExpiry || 'â€”', record.newExpiry || 'â€”', record.changedAt || 'â€”'],
             date: record.changedAt || record.archivedAt || record.expiry
         }));
         dateForRow = row => row.date;
@@ -4326,7 +4328,7 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
         columns = ['Application ID', 'Applicant', 'Type', 'Plan', 'Amount', 'Status', 'Submitted', 'Reviewed'];
         rows = reportApplications.filter(application => applicationType === 'All'
             || String(application.application_type || '').toLowerCase() === applicationType.toLowerCase()).map(application => ({
-            cells: [application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || '—', formatPeso(application.plan_price || 0), application.status || 'Unknown', application.submitted_at || application.created_at || '—', application.reviewed_at || '—'],
+            cells: [application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || 'â€”', formatPeso(application.plan_price || 0), application.status || 'Unknown', application.submitted_at || application.created_at || 'â€”', application.reviewed_at || 'â€”'],
             date: application.submitted_at || application.created_at
         }));
         dateForRow = row => row.date;
@@ -4335,7 +4337,7 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
         rows = sales.flatMap(sale => (sale.lineItems || [])
             .filter(item => saleItemCategory === 'All' || saleItemReportCategory(item) === saleItemCategory)
             .map(item => ({
-            cells: [sale.id || '—', sale.customer || 'Name not recorded', item.name || 'Item', saleItemReportCategory(item), `${item.quantity ?? 0} ${item.quantityUnit || ''}`.trim(), formatPeso(item.unitPrice || 0), formatPeso(item.total || 0), sale.date || '—'],
+            cells: [sale.id || 'â€”', sale.customer || 'Name not recorded', item.name || 'Item', saleItemReportCategory(item), `${item.quantity ?? 0} ${item.quantityUnit || ''}`.trim(), formatPeso(item.unitPrice || 0), formatPeso(item.total || 0), sale.date || 'â€”'],
             date: sale.date || sale.createdAt
         })));
         dateForRow = row => row.date;
@@ -4343,21 +4345,21 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
         columns = ['Transaction reference', 'Customer', 'Sale type', 'Total', 'Date', 'Status'];
         rows = sales.filter(sale => salesType === 'All'
             || (salesType === 'membership' ? isMembershipSale(sale) : !isMembershipSale(sale))).map(sale => ({
-            cells: [sale.id || '—', sale.customer || 'Name not recorded', isMembershipSale(sale) ? 'Membership' : 'Product', formatPeso(sale.total), sale.date || '—', sale.status || 'Unknown'],
+            cells: [sale.id || 'â€”', sale.customer || 'Name not recorded', isMembershipSale(sale) ? 'Membership' : 'Product', formatPeso(sale.total), sale.date || 'â€”', sale.status || 'Unknown'],
             date: sale.date || sale.createdAt
         }));
         dateForRow = row => row.date;
     } else if (type === 'membership') {
         columns = ['Member', 'Plan', 'Started', 'Expires'];
         rows = members.filter(member => !isPastMembershipArchiveGrace(member)).map(member => ({
-            cells: [member.name, member.plan, member.startDate || '—', member.expiry || '—'],
+            cells: [member.name, member.plan, member.startDate || 'â€”', member.expiry || 'â€”'],
             date: member.startDate || member.registeredAt
         }));
         dateForRow = row => row.date;
     } else if (type === 'member-status') {
         columns = ['Member', 'Registration Source', 'Plan', 'Expires'];
         rows = members.map(member => ({
-            cells: [member.name, member.registrationSource || 'Not recorded', member.plan || '—', member.expiry || '—'],
+            cells: [member.name, member.registrationSource || 'Not recorded', member.plan || 'â€”', member.expiry || 'â€”'],
             status: getMemberActivityStatus(member)
         }));
     } else if (type === 'member-archives') {
@@ -4379,15 +4381,15 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
         columns = ['Record Type', 'Member / Product', 'Category / Details', 'Plan / Details', 'Previous Plan', 'New Plan', 'Started', 'Expired / Archived', 'New Expiry', 'Fee', 'New Fee', 'Recorded'];
         rows = [
             ...membershipArchives.filter(isMembershipArchiveReady).map(record => ({
-                cells: ['Expired subscription', record.memberName, 'Membership', record.plan, '—', '—', record.startDate || '—', record.expiry, '—', formatPeso(record.price || 0), '—', record.expiry],
+                cells: ['Expired subscription', record.memberName, 'Membership', record.plan, 'â€”', 'â€”', record.startDate || 'â€”', record.expiry, 'â€”', formatPeso(record.price || 0), 'â€”', record.expiry],
                 date: record.expiry
             })),
             ...planArchives.map(record => ({
-                cells: ['Plan change', record.memberName, '—', '—', record.previousPlan, record.newPlan, record.previousStartDate || '—', record.previousExpiry || '—', record.newExpiry || '—', formatPeso(record.previousPrice || 0), formatPeso(record.newPrice || 0), record.changedAt ? new Date(record.changedAt).toLocaleString() : '—'],
+                cells: ['Plan change', record.memberName, 'â€”', 'â€”', record.previousPlan, record.newPlan, record.previousStartDate || 'â€”', record.previousExpiry || 'â€”', record.newExpiry || 'â€”', formatPeso(record.previousPrice || 0), formatPeso(record.newPrice || 0), record.changedAt ? new Date(record.changedAt).toLocaleString() : 'â€”'],
                 date: record.changedAt
             })),
             ...archivedProducts.map(product => ({
-                cells: ['Archived product', product.name, product.category, `${product.size ? `${product.size} · ` : ''}${formatPeso(product.price)} per ${productSaleUnitLabel(product)}`, '—', '—', '—', product.archivedAt ? new Date(product.archivedAt).toLocaleString() : '—', '—', '—', '—', product.archivedAt ? new Date(product.archivedAt).toLocaleString() : '—'],
+                cells: ['Archived product', product.name, product.category, `${product.size ? `${product.size} Â· ` : ''}${formatPeso(product.price)} per ${productSaleUnitLabel(product)}`, 'â€”', 'â€”', 'â€”', product.archivedAt ? new Date(product.archivedAt).toLocaleString() : 'â€”', 'â€”', 'â€”', 'â€”', product.archivedAt ? new Date(product.archivedAt).toLocaleString() : 'â€”'],
                 date: product.archivedAt
             }))
         ];
@@ -4396,12 +4398,12 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
         dateForRow = row => row.date;
     } else if (type === 'payment' || type === 'sales') {
         columns = ['Transaction reference', 'Customer', 'Total', 'Date', 'Status'];
-        rows = sales.map(sale => ({ cells: [sale.id, sale.customer || 'Name not recorded', formatPeso(sale.total), sale.date || '—', sale.status || 'Unknown'], date: sale.date }));
+        rows = sales.map(sale => ({ cells: [sale.id, sale.customer || 'Name not recorded', formatPeso(sale.total), sale.date || 'â€”', sale.status || 'Unknown'], date: sale.date }));
         dateForRow = row => row.date;
     } else if (type === 'renewals') {
         columns = ['Transaction reference', 'Member', 'Renewed Plan', 'Channel', 'Amount', 'Date', 'Payment record'];
         rows = getRenewalReportRows().map(sale => ({
-            cells: [sale.saleRecorded === false ? 'Not recorded' : sale.id, sale.customer || 'Name not recorded', getRenewalPlan(sale), getRenewalChannel(sale), formatPeso(sale.total), sale.date || '—', sale.saleRecorded === false ? 'Missing payment record' : 'Recorded'],
+            cells: [sale.saleRecorded === false ? 'Not recorded' : sale.id, sale.customer || 'Name not recorded', getRenewalPlan(sale), getRenewalChannel(sale), formatPeso(sale.total), sale.date || 'â€”', sale.saleRecorded === false ? 'Missing payment record' : 'Recorded'],
             date: sale.date
         }));
         dateForRow = row => row.date;
@@ -4432,7 +4434,7 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
     }
 
     const tableHTML = records => `<table><thead><tr>${columns.map(column => `<th>${escapeHTML(column)}</th>`).join('')}</tr></thead><tbody>${records.map(row =>
-        `<tr>${row.cells.map(cell => `<td>${escapeHTML(cell ?? '—')}</td>`).join('')}</tr>`
+        `<tr>${row.cells.map(cell => `<td>${escapeHTML(cell ?? 'â€”')}</td>`).join('')}</tr>`
     ).join('')}</tbody></table>`;
 
     let reportContent;
@@ -4468,7 +4470,7 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
             ...income.rows.map(row => ({ cells: [row.label, row.count, formatPeso(row.income)] })),
             { cells: ['Overall membership income', income.totalCount, formatPeso(income.totalIncome)] }
         ];
-        reportContent = `<section class="report-section membership-income-section"><div class="section-heading"><h2>Membership Income</h2><span>${income.totalCount} paid sales · ${formatPeso(income.totalIncome)}</span></div>${tableHTML(incomeRows)}</section>${reportContent}`;
+        reportContent = `<section class="report-section membership-income-section"><div class="section-heading"><h2>Membership Income</h2><span>${income.totalCount} paid sales Â· ${formatPeso(income.totalIncome)}</span></div>${tableHTML(incomeRows)}</section>${reportContent}`;
     }
 
     const generatedAt = new Date().toLocaleString();
@@ -4496,7 +4498,7 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
             .empty { padding: 18px; border: 1px dashed #cbd0d8; color: #707887; text-align: center; }
             .footer { margin-top: 28px; padding-top: 9px; border-top: 1px solid #d8dce2; color: #858c98; font-size: 9px; }
             @media print { thead { display: table-header-group; } }
-        </style></head><body><header class="masthead"><img src="${logoURL}" alt="Iron Grind"><div><div class="brand">Iron Grind Fitness Gym</div><h1>${escapeHTML(reportTitle)}</h1></div></header><div class="meta"><span>Period: ${escapeHTML(selectedPeriod.label)} · ${rows.length} ${rows.length === 1 ? 'record' : 'records'}</span><span>Generated ${escapeHTML(generatedAt)}</span></div>${reportContent}<footer class="footer">Iron Grind Fitness Gym · Internal report · ${todayStr()}</footer></body></html>`);
+        </style></head><body><header class="masthead"><img src="${logoURL}" alt="Iron Grind"><div><div class="brand">Iron Grind Fitness Gym</div><h1>${escapeHTML(reportTitle)}</h1></div></header><div class="meta"><span>Period: ${escapeHTML(selectedPeriod.label)} Â· ${rows.length} ${rows.length === 1 ? 'record' : 'records'}</span><span>Generated ${escapeHTML(generatedAt)}</span></div>${reportContent}<footer class="footer">Iron Grind Fitness Gym Â· Internal report Â· ${todayStr()}</footer></body></html>`);
     reportWindow.document.close();
     if (inAppPreview) {
         window.setTimeout(() => setReportPreviewZoom(0), 100);
@@ -4675,7 +4677,7 @@ async function exportAllReports() {
     };
     try {
         if (!types.length) throw new Error('Choose a valid report area.');
-        toast(`Preparing PDFs for ${period.label}…`, 'success');
+        toast(`Preparing PDFs for ${period.label}â€¦`, 'success');
         if (types.length === 1) {
             const type = types[0];
             const pdfBlob = createMonthlyReportPDF(type, period);
@@ -4789,9 +4791,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!localStorage.getItem('ig_products')) {
         saveDB('products', [
-            { id: 'P001', name: 'Whey Protein — Chocolate', category: 'Supplement', price: 2450, stock: 3, stockUnit: 'kilogram', size: '' },
+            { id: 'P001', name: 'Whey Protein â€” Chocolate', category: 'Supplement', price: 2450, stock: 3, stockUnit: 'kilogram', size: '' },
             { id: 'P002', name: 'Creatine Monohydrate', category: 'Supplement', price: 1200, stock: 2, stockUnit: 'kilogram', size: '' },
-            { id: 'P003', name: 'Pre-Workout — Fruit Punch', category: 'Supplement', price: 1850, stock: 4, stockUnit: 'kilogram', size: '' },
+            { id: 'P003', name: 'Pre-Workout â€” Fruit Punch', category: 'Supplement', price: 1850, stock: 4, stockUnit: 'kilogram', size: '' },
             { id: 'P004', name: 'Multivitamins', category: 'Supplement', price: 850, stock: 24, stockUnit: 'kilogram', size: '' },
             { id: 'P005', name: 'IronGrind Shirt', category: 'Merch', merchType: 'apparel', price: 650, stock: 1, stockUnit: 'item', size: 'Large' },
             { id: 'P006', name: 'IronGrind Shirt', category: 'Merch', merchType: 'apparel', price: 650, stock: 12, stockUnit: 'item', size: 'Medium' },
@@ -4801,7 +4803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!localStorage.getItem('ig_sales')) {
         saveDB('sales', [
             { id: 'IG-1042', customer: 'Maria Santos', items: 'Whey Protein x1', total: 2450, date: todayStr(), status: 'Paid' },
-            { id: 'IG-1041', customer: 'Walk-in — Carlo M.', items: 'Shirt (L) + Vitamins', total: 1500, date: todayStr(), status: 'Paid' },
+            { id: 'IG-1041', customer: 'Walk-in â€” Carlo M.', items: 'Shirt (L) + Vitamins', total: 1500, date: todayStr(), status: 'Paid' },
             { id: 'IG-1040', customer: 'Juan Dela Cruz', items: 'Pre-Workout x1', total: 1850, date: todayStr(), status: 'Paid' }
         ]);
     }
@@ -4863,3 +4865,5 @@ window.addEventListener('load', () => {
         }
     }, 2500);
 });
+
+
