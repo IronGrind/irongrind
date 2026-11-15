@@ -375,6 +375,8 @@ button.action-loading::after { content: ''; position: absolute; bottom: 0; left:
 .report-pdf-preview-controls { display: flex; align-items: center; gap: 8px; }
 .report-pdf-preview-controls span { min-width: 42px; color: #c4cad5; text-align: center; font-size: .85rem; }
 .report-pdf-preview-frame { display: block; flex: 1 1 auto; width: 100%; min-height: 0; border: 0; border-radius: 8px; background: #fff; }
+html[data-dashboard-theme="light"] body.admin-dashboard .report-pdf-preview-toolbar { color: #202938; }
+html[data-dashboard-theme="light"] body.admin-dashboard .report-pdf-preview-controls span { color: #586579; }
 label:has(input[name="wiPlan"]:checked) {
     border-color: #760000 !important;
     background: rgba(118,0,0,0.08) !important;

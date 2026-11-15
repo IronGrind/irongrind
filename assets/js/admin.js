@@ -3760,6 +3760,8 @@ function renderReports() {
                     ${group.reports.map(report => {
                         const previewCall = report.id === 'members' ? "chooseMemberReportStatus('preview')" : `viewReportPDF('${report.id}')`;
                         const downloadCall = report.id === 'members' ? "chooseMemberReportStatus('download')" : `downloadReportPDF('${report.id}')`;
+                        const finalPreviewCall = report.id === 'membership-applications' ? "chooseMembershipApplicationStatus('preview')" : previewCall;
+                        const finalDownloadCall = report.id === 'membership-applications' ? "chooseMembershipApplicationStatus('download')" : downloadCall;
                         return `
                         <article class="report-card">
                             <div class="report-card-icon"><i class="fas ${report.icon}" aria-hidden="true"></i></div>
@@ -3768,8 +3770,8 @@ function renderReports() {
                                 <p>${report.description}</p>
                             </div>
                             <div class="report-card-actions" aria-label="${report.name} actions">
-                                <button class="btn-sm" type="button" onclick="${previewCall}"><i class="fas fa-eye" aria-hidden="true"></i> Preview</button>
-                                <button class="btn-primary" type="button" onclick="${downloadCall}"><i class="fas fa-download" aria-hidden="true"></i> Download PDF</button>
+                                <button class="btn-sm" type="button" onclick="${finalPreviewCall}"><i class="fas fa-eye" aria-hidden="true"></i> Preview</button>
+                                <button class="btn-primary" type="button" onclick="${finalDownloadCall}"><i class="fas fa-download" aria-hidden="true"></i> Download PDF</button>
                             </div>
                         </article>
                     `;
@@ -3868,6 +3870,10 @@ function printSelectedReport() {
     }
     if (area === 'members') {
         chooseMemberReportStatus('print');
+        return;
+    }
+    if (area === 'membership-applications') {
+        chooseMembershipApplicationStatus('print');
         return;
     }
     printReportPDF(area);
@@ -4105,16 +4111,39 @@ function runMemberReportAction(action, status) {
     else downloadReportPDF('members', status);
 }
 
-function viewReportPDF(type, inAppPreview = false, memberStatus = null) {
+function chooseMembershipApplicationStatus(action) {
+    let period;
+    try { period = getSelectedReportPeriod(); }
+    catch (error) { toast(error.message, 'error'); return; }
+    const statuses = ['Pending', 'Approved', 'Rejected', 'All'];
+    const actionLabel = action === 'preview' ? 'view' : action === 'print' ? 'print' : 'download';
+    document.getElementById('modalContent')?.classList.remove('report-pdf-modal');
+    openModal(`<h3><i class="fas fa-file-signature"></i> Membership Application Records</h3>
+        <p class="modal-sub">Choose an application status to ${actionLabel} for ${escapeHTML(period.label)}. The date filter uses the submitted date.</p>
+        <div class="modal-actions member-report-status-actions"><button class="btn-sm" type="button" onclick="closeModal()"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back</button>${statuses.map(status => `<button class="${status === 'All' ? 'btn-sm' : 'btn-primary'}" type="button" onclick="runMembershipApplicationReportAction('${action}', '${status}')">${status === 'All' ? 'All statuses' : status}</button>`).join('')}</div>`);
+}
+
+function runMembershipApplicationReportAction(action, status) {
+    closeModal();
+    if (action === 'preview') viewReportPDF('membership-applications', false, null, status);
+    else if (action === 'print') printReportPDF('membership-applications', false, 'All', status);
+    else downloadReportPDF('membership-applications', null, status);
+}
+
+function viewReportPDF(type, inAppPreview = false, memberStatus = null, applicationStatus = null) {
     if (type === 'members' && !inAppPreview && memberStatus === null) {
         chooseMemberReportStatus('preview');
         return;
     }
+    if (type === 'membership-applications' && !inAppPreview && applicationStatus === null) {
+        chooseMembershipApplicationStatus('preview');
+        return;
+    }
     reportPreviewZoom = 110;
     openModal(`<div class="report-pdf-preview-toolbar">
-        <strong><i class="fas fa-file-pdf"></i> ${type === 'members' ? `Member Records${memberStatus && memberStatus !== 'All' ? ` — ${escapeHTML(memberStatus)}` : ''} preview` : 'Report preview'}</strong>
+        <strong><i class="fas fa-file-pdf"></i> ${type === 'members' ? `Member Records${memberStatus && memberStatus !== 'All' ? ` — ${escapeHTML(memberStatus)}` : ''} preview` : type === 'membership-applications' ? `Membership Application Records${applicationStatus && applicationStatus !== 'All' ? ` — ${escapeHTML(applicationStatus)}` : ''} preview` : 'Report preview'}</strong>
         <div class="report-pdf-preview-controls">
-            ${type === 'members' ? '<button class="btn-sm" type="button" onclick="chooseMemberReportStatus(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to status</button>' : ''}
+            ${type === 'members' ? '<button class="btn-sm" type="button" onclick="chooseMemberReportStatus(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to status</button>' : type === 'membership-applications' ? '<button class="btn-sm" type="button" onclick="chooseMembershipApplicationStatus(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to status</button>' : ''}
             <button class="btn-sm" aria-label="Zoom out" onclick="setReportPreviewZoom(-10)">−</button>
             <span id="reportPreviewZoomLabel">110%</span>
             <button class="btn-sm" aria-label="Zoom in" onclick="setReportPreviewZoom(10)">+</button>
@@ -4122,10 +4151,10 @@ function viewReportPDF(type, inAppPreview = false, memberStatus = null) {
         </div>
     </div><iframe id="reportPdfPreviewFrame" class="report-pdf-preview-frame" title="Scrollable report PDF preview"></iframe>`);
     document.getElementById('modalContent').classList.add('report-pdf-modal');
-    printReportPDF(type, true, memberStatus || 'All');
+    printReportPDF(type, true, memberStatus || 'All', applicationStatus || 'All');
 }
 
-function printReportPDF(type, inAppPreview = false, memberStatus = 'All') {
+function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applicationStatus = 'All') {
     let selectedPeriod;
     try { selectedPeriod = getSelectedReportPeriod(); }
     catch (error) { toast(error.message, 'error'); return; }
@@ -4145,7 +4174,8 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All') {
     }
 
     const reportNames = { sales: 'Sales Records', 'sale-items': 'Sale Item Records', attendance: 'Attendance Records', members: 'Member Records', 'membership-history': 'Membership History Records', 'membership-applications': 'Membership Application Records' };
-    const reportTitle = `${reportNames[type] || 'Gym'}${type === 'members' && memberStatus !== 'All' ? ` - ${memberStatus}` : ''} Report`;
+    const reportStatus = type === 'members' ? memberStatus : type === 'membership-applications' ? applicationStatus : 'All';
+    const reportTitle = `${reportNames[type] || 'Gym'}${reportStatus !== 'All' ? ` - ${reportStatus}` : ''} Report`;
     let columns = [];
     let rows = [];
     let dateForRow = () => null;
@@ -4164,7 +4194,8 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All') {
         dateForRow = row => row.date;
     } else if (type === 'membership-applications') {
         columns = ['Application ID', 'Applicant', 'Type', 'Plan', 'Amount', 'Status', 'Submitted', 'Reviewed'];
-        rows = reportApplications.map(application => ({
+        rows = reportApplications.filter(application => applicationStatus === 'All'
+            || String(application.status || '').toLowerCase() === applicationStatus.toLowerCase()).map(application => ({
             cells: [application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || '—', formatPeso(application.plan_price || 0), application.status || 'Unknown', application.submitted_at || application.created_at || '—', application.reviewed_at || '—'],
             date: application.submitted_at || application.created_at
         }));
@@ -4345,7 +4376,7 @@ function reportDateBelongsToMonth(value, month) {
     return !Number.isNaN(parsed.getTime()) && localDateStr(parsed).slice(0, 7) === month;
 }
 
-function createMonthlyReportPDF(type, period, memberStatus = 'All') {
+function createMonthlyReportPDF(type, period, memberStatus = 'All', applicationStatus = 'All') {
     const JsPDF = window.jspdf?.jsPDF;
     if (!JsPDF) throw new Error('PDF generator did not load. Check the internet connection and reload the admin page.');
 
@@ -4369,7 +4400,9 @@ function createMonthlyReportPDF(type, period, memberStatus = 'All') {
             record.memberName, record.eventType || 'Membership update', record.previousPlan || '-', record.newPlan || '-', record.previousExpiry || '-', record.newExpiry || '-', record.changedAt || '-'
         ])));
     } else if (type === 'membership-applications') {
-        const applicationRows = reportApplications.filter(application => reportDateMatchesPeriod(application.submitted_at || application.created_at, period));
+        const applicationRows = reportApplications.filter(application =>
+            reportDateMatchesPeriod(application.submitted_at || application.created_at, period)
+            && (applicationStatus === 'All' || String(application.status || '').toLowerCase() === applicationStatus.toLowerCase()));
         sections.push(rowsFor(['Application ID', 'Applicant', 'Type', 'Plan', 'Amount', 'Status', 'Submitted', 'Reviewed'], applicationRows.map(application => [
             application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || '-',
             `PHP ${Number(application.plan_price || 0).toFixed(2)}`, application.status || 'Unknown', application.submitted_at || application.created_at || '-', application.reviewed_at || '-'
@@ -4389,7 +4422,8 @@ function createMonthlyReportPDF(type, period, memberStatus = 'All') {
     }
 
     const doc = new JsPDF({ orientation: ['sale-items', 'sales', 'membership-history', 'membership-applications'].includes(type) ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
-    const reportTitle = `${reportNames[type] || 'Iron Grind Report'}${type === 'members' && memberStatus !== 'All' ? ` - ${memberStatus}` : ''}`;
+    const reportStatus = type === 'members' ? memberStatus : type === 'membership-applications' ? applicationStatus : 'All';
+    const reportTitle = `${reportNames[type] || 'Iron Grind Report'}${reportStatus !== 'All' ? ` - ${reportStatus}` : ''}`;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(211, 18, 18);
@@ -4444,6 +4478,10 @@ async function exportAllReports() {
     const selectedArea = document.getElementById('reportsExportArea')?.value || 'all';
     if (selectedArea === 'members') {
         chooseMemberReportStatus('download');
+        return;
+    }
+    if (selectedArea === 'membership-applications') {
+        chooseMembershipApplicationStatus('download');
         return;
     }
     const JsPDF = window.jspdf?.jsPDF;
@@ -4507,9 +4545,13 @@ async function exportAllReports() {
     }
 }
 
-async function downloadReportPDF(type, memberStatus = null) {
+async function downloadReportPDF(type, memberStatus = null, applicationStatus = null) {
     if (type === 'members' && memberStatus === null) {
         chooseMemberReportStatus('download');
+        return;
+    }
+    if (type === 'membership-applications' && applicationStatus === null) {
+        chooseMembershipApplicationStatus('download');
         return;
     }
     let period;
@@ -4524,11 +4566,13 @@ async function downloadReportPDF(type, memberStatus = null) {
         'membership-applications': 'Membership Application Records Report'
     };
     try {
-        const pdfBlob = createMonthlyReportPDF(type, period, memberStatus || 'All');
+        const pdfBlob = createMonthlyReportPDF(type, period, memberStatus || 'All', applicationStatus || 'All');
         const url = URL.createObjectURL(pdfBlob);
         const link = document.createElement('a');
         link.href = url;
-        const reportName = type === 'members' && memberStatus !== 'All' ? `Member Records ${memberStatus} Report` : names[type] || 'Report';
+        const reportStatus = type === 'members' ? memberStatus : type === 'membership-applications' ? applicationStatus : 'All';
+        const reportBaseName = type === 'members' ? 'Member Records' : type === 'membership-applications' ? 'Membership Application Records' : (names[type] || 'Report').replace(/ Report$/, '');
+        const reportName = reportStatus && reportStatus !== 'All' ? `${reportBaseName} ${reportStatus} Report` : names[type] || 'Report';
         link.download = `${reportName} (${period.slug}).pdf`;
         link.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
