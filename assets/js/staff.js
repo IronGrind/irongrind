@@ -640,16 +640,22 @@ async function loadStaffRequests() {
             return submittedAt(b.submitted_at) - submittedAt(a.submitted_at);
         });
         for (const request of newestFirst) {
-            const card = document.createElement('article'); card.className = 'staff-request-card';
+            const card = document.createElement('article'); card.className = `staff-request-card staff-request-card--${request.application_type}`;
             card.dataset.searchText = `${request.full_name} ${request.plan}`.toLowerCase();
             card.dataset.requestType = request.application_type;
-            const heading = document.createElement('h3'); heading.textContent = request.full_name;
-            const details = document.createElement('p');
-            const requestLabel = request.application_type === 'plan_change'
-                ? 'Plan change'
-                : request.application_type === 'renewal' ? 'Renewal' : 'Registration';
-            details.textContent = `${requestLabel} · ${request.plan} · ${formatStaffPeso(request.plan_price)}`;
-            const date = document.createElement('small'); date.textContent = `Submitted ${new Date(request.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}`;
+            const requestLabel = request.application_type === 'plan_change' ? 'Plan change' : request.application_type === 'renewal' ? 'Renewal' : 'Registration';
+            const heading = document.createElement('div'); heading.className = 'staff-request-card-heading';
+            const name = document.createElement('h3'); name.textContent = request.full_name;
+            const typeBadge = document.createElement('span'); typeBadge.className = 'staff-request-kind'; typeBadge.textContent = requestLabel;
+            heading.append(name, typeBadge);
+            const details = document.createElement('div'); details.className = 'staff-request-plan';
+            const plan = document.createElement('strong'); plan.textContent = request.plan;
+            const price = document.createElement('span'); price.className = 'staff-request-price'; price.textContent = formatStaffPeso(request.plan_price);
+            details.append(plan, price);
+            const date = document.createElement('small'); date.className = 'staff-request-date';
+            const dateIcon = document.createElement('i'); dateIcon.className = 'fas fa-clock'; dateIcon.setAttribute('aria-hidden', 'true');
+            const dateText = document.createElement('span'); dateText.textContent = `Submitted ${new Date(request.submitted_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}`;
+            date.append(dateIcon, dateText);
             const actions = document.createElement('div'); actions.className = 'staff-form-actions';
             for (const [decision, label] of [['approved', 'Approve'], ['rejected', 'Reject']]) {
                 const button = document.createElement('button'); button.type = 'button';
@@ -672,7 +678,8 @@ async function loadStaffRequests() {
                 });
                 actions.append(button);
             }
-            card.append(heading, details, date, actions); list.append(card);
+            card.append(heading, details, date, actions);
+            list.append(card);
         }
         filterStaffRequests();
     } catch (error) { status.textContent = `Could not load requests: ${error.message}`; }
