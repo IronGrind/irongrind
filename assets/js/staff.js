@@ -593,6 +593,8 @@ document.getElementById('staffChangeSearch').addEventListener('keydown', event =
 document.getElementById('staffRenewMembership').addEventListener('click', () => submitStaffMembershipChange('renewal'));
 document.getElementById('staffSavePlanChange').addEventListener('click', () => submitStaffMembershipChange('plan_change'));
 function filterStaffRequests() {
+    const filterBar = document.querySelector('#staffRequestsView .staff-request-filters');
+    const filterBarTop = filterBar?.getBoundingClientRect().top;
     const query = (document.getElementById('staffRequestSearch')?.value || '').trim().toLowerCase();
     const type = document.getElementById('staffRequestType')?.value || 'all';
     const cards = document.querySelectorAll('#staffRequestList .staff-request-card');
@@ -602,6 +604,12 @@ function filterStaffRequests() {
         if (!card.hidden) visible++;
     });
     document.getElementById('staffRequestsStatus').textContent = visible ? `${visible} pending request(s).` : 'No matching pending requests.';
+    if (filterBar && Number.isFinite(filterBarTop)) {
+        requestAnimationFrame(() => {
+            const shift = filterBar.getBoundingClientRect().top - filterBarTop;
+            if (Math.abs(shift) > 1) window.scrollBy({ top: shift, behavior: 'instant' });
+        });
+    }
 }
 
 function setStaffRequestType(type) {
