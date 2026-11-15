@@ -617,8 +617,8 @@ label:has(input[name="wiPlan"]:checked) {
 .modal-sub { color: #8b95a9; font-size: 0.85rem; margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions button { flex: 1; justify-content: center; }
-.member-report-status-actions { flex-wrap: wrap; }
-.member-report-status-actions > button { flex: 1 1 100px; min-width: 90px; min-height: 42px; }
+.report-choice-actions { flex-wrap: wrap; }
+.report-choice-actions > button { flex: 1 1 100px; min-width: 90px; min-height: 42px; }
 .phone-pair-end-button { flex: 1 1 0 !important; min-width: 0; white-space: normal; }
 .paired-phone-list { display: grid; gap: 8px; margin-top: 14px; text-align: left; }
 .paired-phone-count { display: inline-grid; place-items: center; min-width: 23px; height: 23px; margin-left: 5px; padding: 0 6px; border-radius: 999px; background: rgba(139,0,0,.2); color: #f3a0a0; font-size: .75rem; vertical-align: middle; }
