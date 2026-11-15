@@ -107,12 +107,6 @@ body.admin-dashboard .admin-section { min-height: 100%; flex-shrink: 0; }
 .activity-filters label { min-width: 0; }
 .activity-table { max-height: 55dvh; overflow: auto; overscroll-behavior: contain; border: 1px solid rgba(190,201,220,.12); border-radius: 12px; }
 .activity-table table { min-width: 0; width: 100%; table-layout: fixed; }
-.activity-table th:nth-child(1) { width: 15%; }
-.activity-table th:nth-child(2) { width: 20%; }
-.activity-table th:nth-child(3) { width: 12%; }
-.activity-table th:nth-child(4) { width: 13%; }
-.activity-table th:nth-child(5) { width: 22%; }
-.activity-table th:nth-child(6) { width: 18%; }
 .activity-table th { position: sticky; top: 0; z-index: 1; background: #1b202a; }
 .activity-table td { overflow-wrap: anywhere; max-width: 260px; }
 .activity-table td[data-label="Action"], .activity-table td[data-label="Area"] { overflow-wrap: anywhere; word-break: normal; line-height: 1.45; }
@@ -549,9 +543,12 @@ label:has(input[name="wiPlan"]:checked) {
 .activity-event-details dt { font-size:.7rem; opacity:.7; margin-top:10px; }
 .activity-event-details dt:first-child { margin-top:0; }
 .activity-event-details dd { margin:4px 0 0; font-size:.75rem; line-height:1.5; overflow-wrap:anywhere; }
-.activity-table th:nth-child(3) { width:20%; }
-.activity-table th:nth-child(5) { width:20%; }
-.activity-table th:nth-child(6) { width:12%; }
+.activity-table th:nth-child(1) { width:12%; }
+.activity-table th:nth-child(2) { width:16%; }
+.activity-table th:nth-child(3) { width:18%; }
+.activity-table th:nth-child(4) { width:10%; }
+.activity-table th:nth-child(5) { width:16%; }
+.activity-table th:nth-child(6) { width:28%; }
 /* Split-screen widths can keep the panel container wider than the visible pane.
    Use the viewport breakpoint too, so expanded event details get a full row. */
 @media (max-width:1024px) {

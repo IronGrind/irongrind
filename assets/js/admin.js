@@ -4092,6 +4092,7 @@ function chooseMemberReportStatus(action) {
     catch (error) { toast(error.message, 'error'); return; }
     const statuses = ['Active', 'Expired', 'Inactive', 'All'];
     const actionLabel = action === 'preview' ? 'view' : action === 'print' ? 'print' : 'download';
+    document.getElementById('modalContent')?.classList.remove('report-pdf-modal');
     openModal(`<h3><i class="fas fa-users"></i> Member Records</h3>
         <p class="modal-sub">Choose a status to ${actionLabel} for ${escapeHTML(period.label)}. The date filter uses the membership start date, with account creation date as a fallback.</p>
         <div class="modal-actions member-report-status-actions"><button class="btn-sm" type="button" onclick="closeModal()"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back</button>${statuses.map(status => `<button class="${status === 'All' ? 'btn-sm' : 'btn-primary'}" type="button" onclick="runMemberReportAction('${action}', '${status}')">${status === 'All' ? 'All statuses' : status}</button>`).join('')}</div>`);
