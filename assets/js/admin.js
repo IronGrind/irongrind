@@ -47,6 +47,8 @@ let products = [];
 let archivedProducts = [];
 let sales = [];
 let approvedRenewalApplications = [];
+let reportApplications = [];
+let reportMembershipHistory = [];
 let attendance = [];
 let pendingApprovals = [];
 let users = [];
@@ -1050,7 +1052,7 @@ async function loadSupabaseOperationalData(options = {}) {
         const { error: archiveError } = await client.rpc('admin_capture_expired_memberships');
         if (archiveError) console.error('Could not archive expired memberships:', archiveError);
     }
-    const [productsResult, salesResult, attendanceResult, renewalsResult, historyResult] = await Promise.all([
+    const [productsResult, salesResult, attendanceResult, renewalsResult, historyResult, reportApplicationsResult] = await Promise.all([
         client.from('products').select('*').order('name'),
         client.from('sales')
             .select('*, sale_items!sale_items_sale_id_fkey(*)')
@@ -1059,7 +1061,8 @@ async function loadSupabaseOperationalData(options = {}) {
         client.from('membership_applications').select('*')
             .eq('application_type', 'renewal').eq('status', 'approved')
             .order('reviewed_at', { ascending: false }),
-        client.from('membership_history').select('*').order('recorded_at', { ascending: false })
+        client.from('membership_history').select('*').order('recorded_at', { ascending: false }),
+        client.from('membership_applications').select('*').order('submitted_at', { ascending: false })
     ]);
 
     if (productsResult.error) {
@@ -1122,8 +1125,16 @@ async function loadSupabaseOperationalData(options = {}) {
                 changedBy: row.event_type
             };
         });
+        reportMembershipHistory = remoteHistory;
         membershipArchives = remoteHistory.filter(row => row.eventType === 'expired');
         planArchives = remoteHistory.filter(row => row.eventType === 'plan_change');
+    }
+    if (reportApplicationsResult.error) {
+        console.error('Could not load membership applications for reports:', reportApplicationsResult.error);
+        reportApplications = [];
+        toast(`Could not load membership applications for reports: ${reportApplicationsResult.error.message}`, 'error');
+    } else {
+        reportApplications = reportApplicationsResult.data;
     }
     renderStore();
     renderSales();
@@ -3676,33 +3687,24 @@ function renderReports() {
             id: 'membership',
             name: 'Membership',
             reports: [
-                { id: 'membership', name: 'Membership Report', description: 'Memberships started and recorded membership income.', icon: 'fa-id-card' },
-                { id: 'member-status', name: 'Member Status', description: 'Current active, expired, and inactive membership snapshot.', icon: 'fa-user-check' },
-                { id: 'renewals', name: 'Renewal Report', description: 'Renewal requests and their recorded payment details.', icon: 'fa-rotate' }
+                { id: 'members', name: 'Member Records', description: 'Member information and current membership details.', icon: 'fa-users' },
+                { id: 'membership-history', name: 'Membership History Records', description: 'Previous and updated membership plan records.', icon: 'fa-clock-rotate-left' },
+                { id: 'membership-applications', name: 'Membership Application Records', description: 'Submitted membership applications and their status.', icon: 'fa-file-signature' }
             ]
         },
         {
-            id: 'operations',
-            name: 'Operations',
+            id: 'attendance',
+            name: 'Attendance',
             reports: [
-                { id: 'attendance', name: 'Attendance Report', description: 'Member attendance records for the selected period.', icon: 'fa-clipboard-user' },
-                { id: 'inventory', name: 'Inventory Report', description: 'Current product stock and price snapshot.', icon: 'fa-boxes-stacked' }
+                { id: 'attendance', name: 'Attendance Records', description: 'Member attendance records for the selected period.', icon: 'fa-clipboard-user' }
             ]
         },
         {
-            id: 'payments',
-            name: 'Payments & Sales',
+            id: 'sales',
+            name: 'Sales',
             reports: [
-                { id: 'payment', name: 'Payment Report', description: 'Recorded payment transactions for the selected period.', icon: 'fa-money-bill-wave' },
-                { id: 'sales', name: 'Sales Report', description: 'Sales transactions and totals for the selected period.', icon: 'fa-coins' }
-            ]
-        },
-        {
-            id: 'archives',
-            name: 'Archives',
-            reports: [
-                { id: 'member-archives', name: 'Member Archives', description: 'Expired memberships and previous membership plans.', icon: 'fa-user-clock' },
-                { id: 'product-archives', name: 'Product Archives', description: 'Products removed from the active inventory.', icon: 'fa-box-archive' }
+                { id: 'sales', name: 'Sales Records', description: 'Sales transactions and totals for the selected period.', icon: 'fa-coins' },
+                { id: 'sale-items', name: 'Sale Item Records', description: 'Items, quantities, unit prices, and line totals for each sale.', icon: 'fa-receipt' }
             ]
         }
     ];
@@ -3712,10 +3714,10 @@ function renderReports() {
         <div class="reports-toolbar">
             <div class="reports-toolbar-copy">
                 <strong>Report filters</strong>
-                <p>Date selection updates the summary, report previews, and exports. Status and inventory reports show current snapshots.</p>
+                <p>Choose a day, date range, or year. Reports use member, membership history, membership application, attendance, sales, and sale item records.</p>
             </div>
             <div class="report-export-controls">
-                <label>Export scope<select id="reportsExportArea" onchange="updateReportExportAction()"><option value="all">All reports</option><option value="membership">Membership</option><option value="member-status">Member Status</option><option value="renewals">Renewals</option><option value="member-archives">Member Archives</option><option value="product-archives">Product Archives</option><option value="attendance">Attendance</option><option value="inventory">Inventory</option><option value="payment">Payments</option><option value="sales">Sales</option></select></label>
+                <label>Export scope<select id="reportsExportArea" onchange="updateReportExportAction()"><option value="all">All six report types</option><option value="sales">Sales records</option><option value="sale-items">Sale item records</option><option value="attendance">Attendance records</option><option value="members">Member records</option><option value="membership-history">Membership history records</option><option value="membership-applications">Membership application records</option></select></label>
                 <label>Report period<select id="reportsPeriodMode" onchange="updateReportPeriodControls()"><option value="day">Specific day</option><option value="range">Date range</option><option value="year">Full year</option></select></label>
                 <label data-report-period="day">Day<input id="reportsDay" type="date" onchange="refreshReportSummary()"></label>
                 <label data-report-period="range">From<input id="reportsFrom" type="date" onchange="refreshReportSummary()"></label>
@@ -4099,13 +4101,39 @@ function printReportPDF(type, inAppPreview = false) {
         return;
     }
 
-    const reportNames = { membership: 'Membership', 'member-status': 'Member Status', 'member-archives': 'Member Archives', 'product-archives': 'Product Archives', payment: 'Payment', attendance: 'Attendance', renewals: 'Membership Renewal', inventory: 'Inventory', sales: 'Sales' };
+    const reportNames = { sales: 'Sales Records', 'sale-items': 'Sale Item Records', attendance: 'Attendance Records', members: 'Member Records', 'membership-history': 'Membership History Records', 'membership-applications': 'Membership Application Records' };
     const reportTitle = `${reportNames[type] || 'Gym'} Report`;
     let columns = [];
     let rows = [];
     let dateForRow = () => null;
 
-    if (type === 'membership') {
+    if (type === 'members') {
+        columns = ['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'];
+        rows = members.map(member => ({
+            cells: [member.name, member.email || '—', member.plan || '—', member.status || getMemberActivityStatus(member), member.startDate || '—', member.expiry || '—']
+        }));
+    } else if (type === 'membership-history') {
+        columns = ['Member', 'Event', 'Previous Plan', 'New Plan', 'Previous Expiry', 'New Expiry', 'Recorded'];
+        rows = reportMembershipHistory.map(record => ({
+            cells: [record.memberName, record.eventType || 'Membership update', record.previousPlan || '—', record.newPlan || '—', record.previousExpiry || '—', record.newExpiry || '—', record.changedAt || '—'],
+            date: record.changedAt || record.archivedAt || record.expiry
+        }));
+        dateForRow = row => row.date;
+    } else if (type === 'membership-applications') {
+        columns = ['Application ID', 'Applicant', 'Type', 'Plan', 'Amount', 'Status', 'Submitted', 'Reviewed'];
+        rows = reportApplications.map(application => ({
+            cells: [application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || '—', formatPeso(application.plan_price || 0), application.status || 'Unknown', application.submitted_at || application.created_at || '—', application.reviewed_at || '—'],
+            date: application.submitted_at || application.created_at
+        }));
+        dateForRow = row => row.date;
+    } else if (type === 'sale-items') {
+        columns = ['Sale reference', 'Customer', 'Item', 'Category', 'Quantity', 'Unit price', 'Line total', 'Sale date'];
+        rows = sales.flatMap(sale => (sale.lineItems || []).map(item => ({
+            cells: [sale.id || '—', sale.customer || 'Name not recorded', item.name || 'Item', item.category || '—', `${item.quantity ?? 0} ${item.quantityUnit || ''}`.trim(), formatPeso(item.unitPrice || 0), formatPeso(item.total || 0), sale.date || '—'],
+            date: sale.date || sale.createdAt
+        })));
+        dateForRow = row => row.date;
+    } else if (type === 'membership') {
         columns = ['Member', 'Plan', 'Started', 'Expires'];
         rows = members.filter(member => !isPastMembershipArchiveGrace(member)).map(member => ({
             cells: [member.name, member.plan, member.startDate || '—', member.expiry || '—'],
@@ -4185,7 +4213,7 @@ function printReportPDF(type, inAppPreview = false) {
 
     // Keep status and inventory reports as current snapshots. Dated reports
     // follow the period selected in the Reports toolbar.
-    if (['membership', 'archives', 'member-archives', 'product-archives', 'payment', 'sales', 'renewals', 'attendance'].includes(type)) {
+    if (['membership-history', 'membership-applications', 'sale-items', 'sales', 'attendance'].includes(type)) {
         rows = rows.filter(row => reportDateMatchesPeriod(dateForRow(row), selectedPeriod));
     }
 
@@ -4194,13 +4222,8 @@ function printReportPDF(type, inAppPreview = false) {
     ).join('')}</tbody></table>`;
 
     let reportContent;
-    if (type === 'inventory') {
-        reportContent = `<section class="report-section"><div class="section-heading"><h2>Current Inventory Snapshot</h2><span>${rows.length} products</span></div>${rows.length ? tableHTML(rows) : '<p class="empty">No inventory records.</p>'}</section>`;
-    } else if (type === 'member-status') {
-        reportContent = ['Active', 'Expired', 'Inactive'].map(status => {
-            const groupRows = rows.filter(row => row.status === status);
-            return `<section class="report-section"><div class="section-heading"><h2>${status} Members</h2><span>${groupRows.length} ${groupRows.length === 1 ? 'member' : 'members'}</span></div>${groupRows.length ? tableHTML(groupRows) : '<p class="empty">No members in this group.</p>'}</section>`;
-        }).join('');
+    if (type === 'members') {
+        reportContent = `<section class="report-section"><div class="section-heading"><h2>Member Records Snapshot</h2><span>${rows.length} ${rows.length === 1 ? 'member' : 'members'}</span></div>${rows.length ? tableHTML(rows) : '<p class="empty">No member records.</p>'}</section>`;
     } else {
         const monthGroups = new Map();
         rows.forEach(row => {
@@ -4284,87 +4307,45 @@ function createMonthlyReportPDF(type, period) {
     if (!JsPDF) throw new Error('PDF generator did not load. Check the internet connection and reload the admin page.');
 
     const reportNames = {
-        membership: 'Membership Report',
-        'member-status': 'Member Status Report',
-        'member-archives': 'Member Archives Report',
-        'product-archives': 'Product Archives Report',
-        archives: 'Archives Report',
-        payment: 'Payment Report',
-        attendance: 'Attendance Report',
-        renewals: 'Membership Renewal Report',
-        inventory: 'Inventory Report',
-        sales: 'Sales Report'
+        sales: 'Sales Records Report',
+        'sale-items': 'Sale Item Records Report',
+        attendance: 'Attendance Records Report',
+        members: 'Member Records Report',
+        'membership-history': 'Membership History Records Report',
+        'membership-applications': 'Membership Application Records Report'
     };
     const sections = [];
     const rowsFor = (headers, rows) => ({ headers, rows });
-    const membersForPeriod = members.filter(member => !isPastMembershipArchiveGrace(member)
-        && reportDateMatchesPeriod(member.startDate || member.registeredAt, period));
-
-    if (type === 'membership') {
-        sections.push(rowsFor(['Member', 'Plan', 'Started', 'Expires'], membersForPeriod.map(member => [member.name, member.plan, member.startDate || '-', member.expiry || '-'])));
-        const income = getMembershipIncomeBreakdown(period);
-        sections.push(rowsFor(['Plan', 'Paid Sales', 'Income'], [
-            ...income.rows.map(row => [row.label, String(row.count), `PHP ${row.income.toFixed(2)}`]),
-            ['Overall membership income', String(income.totalCount), `PHP ${income.totalIncome.toFixed(2)}`]
-        ]));
-    } else if (type === 'member-status') {
-        sections.push(rowsFor(['Member', 'Registration Source', 'Plan', 'Expires'], members.map(member => [
-            member.name,
-            member.registrationSource || 'Not recorded',
-            member.plan || '-',
-            member.expiry || '-'
+    if (type === 'members') {
+        sections.push(rowsFor(['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'], members.map(member => [
+            member.name, member.email || '-', member.plan || '-', member.status || getMemberActivityStatus(member), member.startDate || '-', member.expiry || '-'
         ])));
-    } else if (type === 'member-archives' || type === 'product-archives') {
-        const archiveRows = getArchiveReportRows(type, period);
-        if (type === 'member-archives') {
-            sections.push(rowsFor(['Record Type', 'Member', 'Plan / Change', 'Previous Expiry', 'Archived / Changed'], archiveRows.map(record => [
-                record.kind === 'plan-change' ? 'Plan change' : 'Expired membership', record.member, record.plan, record.previousExpiry, record.archivedAt
-            ])));
-        } else {
-            sections.push(rowsFor(['Product', 'Category', 'Size', 'Price', 'Archived'], archiveRows.map(record => [
-                record.product, record.category, record.size, `PHP ${record.price.toFixed(2)}`, record.archivedAt
-            ])));
-        }
-    } else if (type === 'archives') {
-        captureExpiredMemberships();
-        const archivedRows = [
-            ...membershipArchives.filter(isMembershipArchiveReady)
-                .filter(record => reportDateMatchesPeriod(record.archivedAt || record.expiry, period))
-                .map(record => ['Expired membership', record.memberName, 'Membership', record.plan, record.expiry || '-']),
-            ...planArchives.filter(record => reportDateMatchesPeriod(record.changedAt, period))
-                .map(record => ['Plan change', record.memberName, `${record.previousPlan || '-'} to ${record.newPlan || '-'}`, record.previousExpiry || '-', record.changedAt || '-']),
-            ...archivedProducts.filter(record => reportDateMatchesPeriod(record.archivedAt, period))
-                .map(record => ['Archived product', record.name, record.category, record.size || '-', record.archivedAt || '-'])
-        ];
-        sections.push(rowsFor(['Record Type', 'Member / Product', 'Category / Details', 'Plan / Previous Expiry', 'Archived / Changed'], archivedRows));
-    } else if (type === 'payment' || type === 'sales') {
+    } else if (type === 'membership-history') {
+        const historyRows = reportMembershipHistory.filter(record => reportDateMatchesPeriod(record.changedAt, period));
+        sections.push(rowsFor(['Member', 'Event', 'Previous Plan', 'New Plan', 'Previous Expiry', 'New Expiry', 'Recorded'], historyRows.map(record => [
+            record.memberName, record.eventType || 'Membership update', record.previousPlan || '-', record.newPlan || '-', record.previousExpiry || '-', record.newExpiry || '-', record.changedAt || '-'
+        ])));
+    } else if (type === 'membership-applications') {
+        const applicationRows = reportApplications.filter(application => reportDateMatchesPeriod(application.submitted_at || application.created_at, period));
+        sections.push(rowsFor(['Application ID', 'Applicant', 'Type', 'Plan', 'Amount', 'Status', 'Submitted', 'Reviewed'], applicationRows.map(application => [
+            application.id, application.full_name || application.fullName || 'Name not recorded', application.application_type || 'membership', application.plan || '-',
+            `PHP ${Number(application.plan_price || 0).toFixed(2)}`, application.status || 'Unknown', application.submitted_at || application.created_at || '-', application.reviewed_at || '-'
+        ])));
+    } else if (type === 'sale-items') {
+        const itemRows = sales.filter(sale => reportDateMatchesPeriod(sale.date || sale.createdAt, period)).flatMap(sale => (sale.lineItems || []).map(item => [
+            sale.id || '-', sale.customer || 'Name not recorded', item.name || 'Item', item.category || '-', `${item.quantity ?? 0} ${item.quantityUnit || ''}`.trim(),
+            `PHP ${Number(item.unitPrice || 0).toFixed(2)}`, `PHP ${Number(item.total || 0).toFixed(2)}`, sale.date || '-'
+        ]));
+        sections.push(rowsFor(['Sale reference', 'Customer', 'Item', 'Category', 'Quantity', 'Unit price', 'Line total', 'Sale date'], itemRows));
+    } else if (type === 'sales') {
         const filteredSales = sales.filter(sale => reportDateMatchesPeriod(sale.date || sale.createdAt, period));
         sections.push(rowsFor(['Transaction reference', 'Customer', 'Total', 'Date', 'Status'], filteredSales.map(sale => [sale.id || '-', sale.customer || 'Name not recorded', `PHP ${Number(sale.total || 0).toFixed(2)}`, sale.date || '-', sale.status || 'Unknown'])));
     } else if (type === 'attendance') {
         const filteredAttendance = attendance.filter(record => reportDateMatchesPeriod(record.date, period));
         sections.push(rowsFor(['Member', 'Date', 'Time in', 'Time out'], filteredAttendance.map(record => [record.memberName, record.date || '-', formatAttendanceClock(record.timeIn), formatAttendanceClock(record.timeOut)])));
-    } else if (type === 'renewals') {
-        const renewals = getRenewalReportRows().filter(record => reportDateMatchesPeriod(record.date, period));
-        sections.push(rowsFor(['Transaction reference', 'Member', 'Renewed Plan', 'Channel', 'Amount', 'Date', 'Payment record'], renewals.map(record => [
-            record.saleRecorded === false ? 'Not recorded' : record.id || '-',
-            record.customer || 'Name not recorded',
-            getRenewalPlan(record),
-            getRenewalChannel(record),
-            `PHP ${Number(record.total || 0).toFixed(2)}`,
-            record.date || '-',
-            record.saleRecorded === false ? 'Missing payment record' : 'Recorded'
-        ])));
-    } else if (type === 'inventory') {
-        sections.push(rowsFor(['Product', 'Category', 'Type', 'Price', 'Stock'], products.map(product => [
-            `${product.name}${product.size ? ` (${product.size})` : ''}`,
-            product.category === 'Supplement' ? 'Supplement' : 'Merchandise',
-            productClassification(product),
-            `PHP ${Number(product.price || 0).toFixed(2)} / ${productSaleUnitLabel(product)}`,
-            formatProductStock(product)
-        ])));
     }
 
-    const doc = new JsPDF({ orientation: ['archives', 'member-archives', 'product-archives', 'payment', 'sales', 'renewals'].includes(type) ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
+    const doc = new JsPDF({ orientation: ['sale-items', 'sales', 'membership-history', 'membership-applications'].includes(type) ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
     const reportTitle = reportNames[type] || 'Iron Grind Report';
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
@@ -4441,18 +4422,15 @@ async function exportAllReports() {
         toast(`Could not load ${missingTools.join(' and ')}. Reload the page and try again.`, 'error');
         return;
     }
-    const allTypes = ['membership', 'member-status', 'member-archives', 'product-archives', 'payment', 'attendance', 'renewals', 'inventory', 'sales'];
+    const allTypes = ['sales', 'sale-items', 'attendance', 'members', 'membership-history', 'membership-applications'];
     const types = selectedArea === 'all' ? allTypes : allTypes.includes(selectedArea) ? [selectedArea] : [];
     const names = {
-        membership: 'Membership Report',
-        'member-status': 'Member Status Report',
-        'member-archives': 'Member Archives Report',
-        'product-archives': 'Product Archives Report',
-        payment: 'Payment Report',
-        attendance: 'Attendance Report',
-        renewals: 'Membership Renewal Report',
-        inventory: 'Inventory Report',
-        sales: 'Sales Report'
+        sales: 'Sales Records Report',
+        'sale-items': 'Sale Item Records Report',
+        attendance: 'Attendance Records Report',
+        members: 'Member Records Report',
+        'membership-history': 'Membership History Records Report',
+        'membership-applications': 'Membership Application Records Report'
     };
     try {
         if (!types.length) throw new Error('Choose a valid report area.');
@@ -4495,15 +4473,12 @@ async function downloadReportPDF(type) {
     try { period = getSelectedReportPeriod(); }
     catch (error) { toast(error.message, 'error'); return; }
     const names = {
-        membership: 'Membership Report',
-        'member-status': 'Member Status Report',
-        'member-archives': 'Member Archives Report',
-        'product-archives': 'Product Archives Report',
-        payment: 'Payment Report',
-        attendance: 'Attendance Report',
-        renewals: 'Membership Renewal Report',
-        inventory: 'Inventory Report',
-        sales: 'Sales Report'
+        sales: 'Sales Records Report',
+        'sale-items': 'Sale Item Records Report',
+        attendance: 'Attendance Records Report',
+        members: 'Member Records Report',
+        'membership-history': 'Membership History Records Report',
+        'membership-applications': 'Membership Application Records Report'
     };
     try {
         await logReportExportRequest();
