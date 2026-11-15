@@ -3757,7 +3757,10 @@ function renderReports() {
                     <h3>${group.name}</h3>
                 </div>
                 <div class="report-grid">
-                    ${group.reports.map(report => `
+                    ${group.reports.map(report => {
+                        const previewCall = report.id === 'members' ? "chooseMemberReportStatus('preview')" : `viewReportPDF('${report.id}')`;
+                        const downloadCall = report.id === 'members' ? "chooseMemberReportStatus('download')" : `downloadReportPDF('${report.id}')`;
+                        return `
                         <article class="report-card">
                             <div class="report-card-icon"><i class="fas ${report.icon}" aria-hidden="true"></i></div>
                             <div class="report-card-copy">
@@ -3765,11 +3768,12 @@ function renderReports() {
                                 <p>${report.description}</p>
                             </div>
                             <div class="report-card-actions" aria-label="${report.name} actions">
-                                <button class="btn-sm" type="button" onclick="viewReportPDF('${report.id}')"><i class="fas fa-eye" aria-hidden="true"></i> Preview</button>
-                                <button class="btn-primary" type="button" onclick="downloadReportPDF('${report.id}')"><i class="fas fa-download" aria-hidden="true"></i> Download PDF</button>
+                                <button class="btn-sm" type="button" onclick="${previewCall}"><i class="fas fa-eye" aria-hidden="true"></i> Preview</button>
+                                <button class="btn-primary" type="button" onclick="${downloadCall}"><i class="fas fa-download" aria-hidden="true"></i> Download PDF</button>
                             </div>
                         </article>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
             </section>
         `).join('')}
@@ -3860,6 +3864,10 @@ function printSelectedReport() {
     const area = document.getElementById('reportsExportArea')?.value || 'all';
     if (area === 'all') {
         toast('Choose one report area before printing.', 'error');
+        return;
+    }
+    if (area === 'members') {
+        chooseMemberReportStatus('print');
         return;
     }
     printReportPDF(area);
@@ -4078,7 +4086,29 @@ function getMembershipIncomeBreakdown(period) {
     };
 }
 
-function viewReportPDF(type) {
+function chooseMemberReportStatus(action) {
+    let period;
+    try { period = getSelectedReportPeriod(); }
+    catch (error) { toast(error.message, 'error'); return; }
+    const statuses = ['Active', 'Expired', 'Inactive', 'All'];
+    const actionLabel = action === 'preview' ? 'view' : action === 'print' ? 'print' : 'download';
+    openModal(`<h3><i class="fas fa-users"></i> Member Records</h3>
+        <p class="modal-sub">Choose a status to ${actionLabel} for ${escapeHTML(period.label)}. The date filter uses the membership start date, with account creation date as a fallback.</p>
+        <div class="modal-actions member-report-status-actions">${statuses.map(status => `<button class="${status === 'All' ? 'btn-sm' : 'btn-primary'}" type="button" onclick="runMemberReportAction('${action}', '${status}')">${status === 'All' ? 'All statuses' : status}</button>`).join('')}</div>`);
+}
+
+function runMemberReportAction(action, status) {
+    closeModal();
+    if (action === 'preview') viewReportPDF('members', false, status);
+    else if (action === 'print') printReportPDF('members', false, status);
+    else downloadReportPDF('members', status);
+}
+
+function viewReportPDF(type, inAppPreview = false, memberStatus = null) {
+    if (type === 'members' && !inAppPreview && memberStatus === null) {
+        chooseMemberReportStatus('preview');
+        return;
+    }
     reportPreviewZoom = 110;
     openModal(`<div class="report-pdf-preview-toolbar">
         <strong><i class="fas fa-file-pdf"></i> Report preview</strong>
@@ -4090,10 +4120,10 @@ function viewReportPDF(type) {
         </div>
     </div><iframe id="reportPdfPreviewFrame" class="report-pdf-preview-frame" title="Scrollable report PDF preview"></iframe>`);
     document.getElementById('modalContent').classList.add('report-pdf-modal');
-    printReportPDF(type, true);
+    printReportPDF(type, true, memberStatus || 'All');
 }
 
-function printReportPDF(type, inAppPreview = false) {
+function printReportPDF(type, inAppPreview = false, memberStatus = 'All') {
     let selectedPeriod;
     try { selectedPeriod = getSelectedReportPeriod(); }
     catch (error) { toast(error.message, 'error'); return; }
@@ -4113,15 +4143,15 @@ function printReportPDF(type, inAppPreview = false) {
     }
 
     const reportNames = { sales: 'Sales Records', 'sale-items': 'Sale Item Records', attendance: 'Attendance Records', members: 'Member Records', 'membership-history': 'Membership History Records', 'membership-applications': 'Membership Application Records' };
-    const reportTitle = `${reportNames[type] || 'Gym'} Report`;
+    const reportTitle = `${reportNames[type] || 'Gym'}${type === 'members' && memberStatus !== 'All' ? ` - ${memberStatus}` : ''} Report`;
     let columns = [];
     let rows = [];
     let dateForRow = () => null;
 
     if (type === 'members') {
         columns = ['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'];
-        rows = members.map(member => ({
-            cells: [member.name, member.email || '—', member.plan || '—', member.status || getMemberActivityStatus(member), member.startDate || '—', member.expiry || '—']
+        rows = getMemberReportRows(selectedPeriod, memberStatus).map(member => ({
+            cells: [member.name, member.email || '—', member.plan || '—', getMemberActivityStatus(member), member.startDate || '—', member.expiry || '—']
         }));
     } else if (type === 'membership-history') {
         columns = ['Member', 'Event', 'Previous Plan', 'New Plan', 'Previous Expiry', 'New Expiry', 'Recorded'];
@@ -4313,7 +4343,7 @@ function reportDateBelongsToMonth(value, month) {
     return !Number.isNaN(parsed.getTime()) && localDateStr(parsed).slice(0, 7) === month;
 }
 
-function createMonthlyReportPDF(type, period) {
+function createMonthlyReportPDF(type, period, memberStatus = 'All') {
     const JsPDF = window.jspdf?.jsPDF;
     if (!JsPDF) throw new Error('PDF generator did not load. Check the internet connection and reload the admin page.');
 
@@ -4328,8 +4358,8 @@ function createMonthlyReportPDF(type, period) {
     const sections = [];
     const rowsFor = (headers, rows) => ({ headers, rows });
     if (type === 'members') {
-        sections.push(rowsFor(['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'], members.map(member => [
-            member.name, member.email || '-', member.plan || '-', member.status || getMemberActivityStatus(member), member.startDate || '-', member.expiry || '-'
+        sections.push(rowsFor(['Member', 'Email', 'Plan', 'Status', 'Started', 'Expires'], getMemberReportRows(period, memberStatus).map(member => [
+            member.name, member.email || '-', member.plan || '-', getMemberActivityStatus(member), member.startDate || '-', member.expiry || '-'
         ])));
     } else if (type === 'membership-history') {
         const historyRows = reportMembershipHistory.filter(record => reportDateMatchesPeriod(record.changedAt, period));
@@ -4357,7 +4387,7 @@ function createMonthlyReportPDF(type, period) {
     }
 
     const doc = new JsPDF({ orientation: ['sale-items', 'sales', 'membership-history', 'membership-applications'].includes(type) ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
-    const reportTitle = reportNames[type] || 'Iron Grind Report';
+    const reportTitle = `${reportNames[type] || 'Iron Grind Report'}${type === 'members' && memberStatus !== 'All' ? ` - ${memberStatus}` : ''}`;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(211, 18, 18);
@@ -4410,6 +4440,10 @@ async function exportAllReports() {
     try { period = getSelectedReportPeriod(); }
     catch (error) { toast(error.message, 'error'); return; }
     const selectedArea = document.getElementById('reportsExportArea')?.value || 'all';
+    if (selectedArea === 'members') {
+        chooseMemberReportStatus('download');
+        return;
+    }
     const JsPDF = window.jspdf?.jsPDF;
     const pdfTableReady = typeof JsPDF === 'function' && typeof new JsPDF().autoTable === 'function';
     const missingTools = [
@@ -4471,7 +4505,11 @@ async function exportAllReports() {
     }
 }
 
-async function downloadReportPDF(type) {
+async function downloadReportPDF(type, memberStatus = null) {
+    if (type === 'members' && memberStatus === null) {
+        chooseMemberReportStatus('download');
+        return;
+    }
     let period;
     try { period = getSelectedReportPeriod(); }
     catch (error) { toast(error.message, 'error'); return; }
@@ -4484,14 +4522,15 @@ async function downloadReportPDF(type) {
         'membership-applications': 'Membership Application Records Report'
     };
     try {
-        const pdfBlob = createMonthlyReportPDF(type, period);
+        const pdfBlob = createMonthlyReportPDF(type, period, memberStatus || 'All');
         const url = URL.createObjectURL(pdfBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${names[type] || 'Report'} (${period.slug}).pdf`;
+        const reportName = type === 'members' && memberStatus !== 'All' ? `Member Records ${memberStatus} Report` : names[type] || 'Report';
+        link.download = `${reportName} (${period.slug}).pdf`;
         link.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-        toast(`${names[type] || 'Report'} downloaded.`, 'success');
+        toast(`${reportName} downloaded.`, 'success');
     } catch (error) {
         console.error('Could not download PDF report:', error);
         toast(error.message || 'Could not create this PDF report.', 'error');
