@@ -4094,7 +4094,7 @@ function chooseMemberReportStatus(action) {
     const actionLabel = action === 'preview' ? 'view' : action === 'print' ? 'print' : 'download';
     openModal(`<h3><i class="fas fa-users"></i> Member Records</h3>
         <p class="modal-sub">Choose a status to ${actionLabel} for ${escapeHTML(period.label)}. The date filter uses the membership start date, with account creation date as a fallback.</p>
-        <div class="modal-actions member-report-status-actions">${statuses.map(status => `<button class="${status === 'All' ? 'btn-sm' : 'btn-primary'}" type="button" onclick="runMemberReportAction('${action}', '${status}')">${status === 'All' ? 'All statuses' : status}</button>`).join('')}</div>`);
+        <div class="modal-actions member-report-status-actions"><button class="btn-sm" type="button" onclick="closeModal()"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back</button>${statuses.map(status => `<button class="${status === 'All' ? 'btn-sm' : 'btn-primary'}" type="button" onclick="runMemberReportAction('${action}', '${status}')">${status === 'All' ? 'All statuses' : status}</button>`).join('')}</div>`);
 }
 
 function runMemberReportAction(action, status) {
@@ -4111,8 +4111,9 @@ function viewReportPDF(type, inAppPreview = false, memberStatus = null) {
     }
     reportPreviewZoom = 110;
     openModal(`<div class="report-pdf-preview-toolbar">
-        <strong><i class="fas fa-file-pdf"></i> Report preview</strong>
+        <strong><i class="fas fa-file-pdf"></i> ${type === 'members' ? `Member Records${memberStatus && memberStatus !== 'All' ? ` — ${escapeHTML(memberStatus)}` : ''} preview` : 'Report preview'}</strong>
         <div class="report-pdf-preview-controls">
+            ${type === 'members' ? '<button class="btn-sm" type="button" onclick="chooseMemberReportStatus(\'preview\')"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to status</button>' : ''}
             <button class="btn-sm" aria-label="Zoom out" onclick="setReportPreviewZoom(-10)">−</button>
             <span id="reportPreviewZoomLabel">110%</span>
             <button class="btn-sm" aria-label="Zoom in" onclick="setReportPreviewZoom(10)">+</button>
