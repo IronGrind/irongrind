@@ -4500,6 +4500,11 @@ function printReportPDF(type, inAppPreview = false, memberStatus = 'All', applic
             @media print { thead { display: table-header-group; } }
         </style></head><body><header class="masthead"><img src="${logoURL}" alt="Iron Grind"><div><div class="brand">Iron Grind Fitness Gym</div><h1>${escapeHTML(reportTitle)}</h1></div></header><div class="meta"><span>Period: ${escapeHTML(selectedPeriod.label)} · ${rows.length} ${rows.length === 1 ? 'record' : 'records'}</span><span>Generated ${escapeHTML(generatedAt)}</span></div>${reportContent}<footer class="footer">Iron Grind Fitness Gym · Internal report · ${todayStr()}</footer></body></html>`);
     reportWindow.document.close();
+    void recordGeneratedReport(type, selectedPeriod, inAppPreview ? 'preview' : 'print', {
+        member_status: memberStatus, application_type: applicationType,
+        history_type: historyType, sales_type: salesType,
+        sale_item_category: saleItemCategory
+    });
     if (inAppPreview) {
         window.setTimeout(() => setReportPreviewZoom(0), 100);
     } else {
