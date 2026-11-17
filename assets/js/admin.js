@@ -4624,6 +4624,37 @@ function createMonthlyReportPDF(type, period, memberStatus = 'All', applicationT
     return doc.output('blob');
 }
 
+function generatedReportSnapshot(type, period) {
+    const dated = (records, dateOf) => records.filter(record => reportDateMatchesPeriod(dateOf(record), period));
+    if (type === 'members') return members;
+    if (type === 'membership-history') return dated(reportMembershipHistory, record => record.changedAt);
+    if (type === 'membership-applications') return dated(reportApplications, record => record.submitted_at || record.created_at);
+    if (type === 'sales') return dated(sales, record => record.date || record.createdAt);
+    if (type === 'sale-items') return dated(sales, record => record.date || record.createdAt).flatMap(sale =>
+        (sale.lineItems || []).map(item => ({ sale_id: sale.id, sale_date: sale.date || sale.createdAt, customer: sale.customer, ...item })));
+    if (type === 'attendance') return dated(attendance, record => record.date);
+    if (type === 'inventory') return products;
+    return [];
+}
+
+async function recordGeneratedReport(type, period, outputFormat, filters = {}) {
+    const reportData = generatedReportSnapshot(type, period);
+    const { error } = await window.ironGrindSupabase.rpc('record_generated_report', {
+        p_report_type: type,
+        p_period_label: period.label,
+        p_period_start: period.from,
+        p_period_end: period.to,
+        p_filters: filters,
+        p_output_format: outputFormat,
+        p_record_count: reportData.length,
+        p_report_data: reportData
+    });
+    if (error) {
+        console.error('Could not save generated report history:', error);
+        toast('The report was created, but its database history could not be saved.', 'error');
+    }
+}
+
 async function exportAllReports() {
     let period;
     try { period = getSelectedReportPeriod(); }
@@ -4686,6 +4717,7 @@ async function exportAllReports() {
             link.href = url;
             link.download = `${names[type]} (${period.slug}).pdf`;
             link.click();
+            await recordGeneratedReport(type, period, 'pdf', { selection: selectedArea });
             window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             toast(`${names[type]} exported for ${period.label}.`, 'success');
             return;
@@ -4702,6 +4734,7 @@ async function exportAllReports() {
         link.href = url;
         link.download = `Iron Grind Reports (${period.slug}).zip`;
         link.click();
+        await Promise.all(types.map(type => recordGeneratedReport(type, period, 'zip', { selection: 'all' })));
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
         toast(`Exported ${types.length} PDFs for ${period.label}.`, 'success');
     } catch (error) {
@@ -4757,6 +4790,11 @@ async function downloadReportPDF(type, memberStatus = null, applicationType = nu
         const reportName = isAllSelection ? names[type] || 'Report' : `${reportBaseName} ${reportSelection} Report`;
         link.download = `${reportName} (${period.slug}).pdf`;
         link.click();
+        await recordGeneratedReport(type, period, 'pdf', {
+            member_status: memberStatus || 'All', application_type: applicationType || 'All',
+            history_type: historyType || 'All', sales_type: salesType || 'All',
+            sale_item_category: saleItemCategory || 'All'
+        });
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
         toast(`${reportName} downloaded.`, 'success');
     } catch (error) {
