@@ -1198,14 +1198,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-settings-target]').forEach(button => {
         button.addEventListener('click', () => showMemberSettingsSection(button.dataset.settingsTarget));
     });
-    ['settingsMobile', 'settingsEmergencyMobile'].forEach(id => {
-        const input = document.getElementById(id);
-        if (!input) return;
-        input.addEventListener('input', () => {
-            const digits = input.value.replace(/\D/g, '');
-            input.value = digits && !digits.startsWith('9') ? '' : digits.slice(0, 10);
-        });
-    });
     document.getElementById('membershipForm')?.addEventListener('submit', submitMembershipForm);
     document.getElementById('planChangeForm')?.addEventListener('submit', submitPlanChangeRequest);
     document.getElementById('memberSettingsForm')?.addEventListener('submit', submitMemberSettings);

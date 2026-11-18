@@ -764,14 +764,6 @@ document.getElementById('walkinMiddleInitial').addEventListener('input', event =
         input.value = uppercase;
     }
 });
-['walkinMobile', 'walkinEmergencyPhone'].forEach(id => {
-    document.getElementById(id).addEventListener('input', event => {
-        const input = event.currentTarget;
-        const digits = input.value.replace(/[^0-9]/g, '').replace(/^(?:63|0)(?=9)/, '');
-        const mobile = digits.slice(0, 10);
-        if (input.value !== mobile) input.value = mobile;
-    });
-});
 document.getElementById('staffWalkinForm').addEventListener('submit', submitStaffWalkin);
 window.setInterval(() => {
     if (!staffUser || document.hidden || staffBusy) return;

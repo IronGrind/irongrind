@@ -268,3 +268,15 @@ document.addEventListener('input', event => {
     input.value = capitalized;
     input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
 }, true);
+
+function phMobileLocalDigits(value) {
+    return value.replace(/[^0-9]/g, '').replace(/^(?:63|0)(?=9)/, '').slice(0, 10);
+}
+
+document.addEventListener('input', event => {
+    const input = event.target;
+    if (!input.matches?.('.ph-phone-input > input[type="tel"]')) return;
+
+    const digits = phMobileLocalDigits(input.value);
+    if (input.value !== digits) input.value = digits;
+}, true);

@@ -142,20 +142,6 @@ function escapeHTML(value) {
     })[char]);
 }
 
-function setupPhMobileInput(input) {
-    if (!input) return;
-    input.type = 'tel';
-    input.inputMode = 'numeric';
-    input.maxLength = 11;
-    input.pattern = '09[0-9]{9}';
-    input.autocomplete = 'tel';
-    input.placeholder = '09171234567';
-    input.value = input.value.replace(/\D/g, '').slice(0, 11);
-    input.addEventListener('input', () => {
-        input.value = input.value.replace(/\D/g, '').slice(0, 11);
-    });
-}
-
 function loadDB(key) {
     try { return JSON.parse(localStorage.getItem('ig_' + key)) || []; }
     catch { return []; }
@@ -1311,7 +1297,7 @@ function openAddMemberModal() {
                         <option>Male</option><option>Female</option><option>Prefer not to say</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Mobile *</label><input type="tel" id="wiContact" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel"></div>
+                <div class="form-group"><label>Mobile *</label><div class="ph-phone-input"><span id="wiContactPrefix">+63</span><input type="tel" id="wiContact" inputmode="numeric" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" aria-describedby="wiContactPrefix"></div></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Height (cm)</label><input type="number" id="wiHeight" placeholder="170"></div>
@@ -1327,7 +1313,7 @@ function openAddMemberModal() {
             <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
                 <div class="form-group"><label>Name *</label><input type="text" id="wiEcName" data-capitalize-name placeholder="Maria Dela Cruz"></div>
                 <div class="form-group"><label>Relationship *</label><input type="text" id="wiEcRelation" placeholder="Mother"></div>
-                <div class="form-group"><label>Contact Number *</label><input type="tel" id="wiEcContact" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel"></div>
+                <div class="form-group"><label>Contact Number *</label><div class="ph-phone-input"><span id="wiEcContactPrefix">+63</span><input type="tel" id="wiEcContact" inputmode="numeric" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" aria-describedby="wiEcContactPrefix"></div></div>
             </div>
         </div>
 
@@ -1423,8 +1409,6 @@ function openAddMemberModal() {
 
     document.getElementById('modalContent').classList.add('admin-add-member-modal');
 
-    setupPhMobileInput(document.getElementById('wiContact'));
-    setupPhMobileInput(document.getElementById('wiEcContact'));
 
     // ---- Attach the signature canvas after the modal is visible ----
     setTimeout(() => {
@@ -1484,7 +1468,7 @@ async function submitNewMember() {
     const dob = document.getElementById('wiDob').value;
     const age = Number(document.getElementById('wiAge').value);
     const sex = document.getElementById('wiSex').value;
-    const contact = document.getElementById('wiContact').value.trim();
+    const contact = '0' + document.getElementById('wiContact').value;
     const email = document.getElementById('wiEmail').value.trim().toLowerCase();
     const password = document.getElementById('wiPassword').value;
     const confirmPassword = document.getElementById('wiConfirmPassword').value;
@@ -1494,7 +1478,7 @@ async function submitNewMember() {
     // ---- Emergency ----
     const ecName = document.getElementById('wiEcName').value.trim();
     const ecRelation = document.getElementById('wiEcRelation').value.trim();
-    const ecContact = document.getElementById('wiEcContact').value.trim();
+    const ecContact = '0' + document.getElementById('wiEcContact').value;
 
     // ---- Plan ----
     const planInput = document.querySelector('input[name="wiPlan"]:checked');
@@ -1706,7 +1690,7 @@ function renewMember(id) {
         <p class="modal-sub">Choose the renewal plan and record the counter payment.</p>
         <div class="form-row">
             <div class="form-group"><label for="crName">Full Name *</label><input type="text" id="crName" data-capitalize-name value="${escapeHTML(member.name || '')}" required></div>
-            <div class="form-group"><label for="crContact">Contact Number *</label><input type="tel" id="crContact" value="${escapeHTML(member.contact || '')}" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel" required></div>
+            <div class="form-group"><label for="crContact">Contact Number *</label><div class="ph-phone-input"><span id="crContactPrefix">+63</span><input type="tel" id="crContact" value="${escapeHTML(phMobileLocalDigits(member.contact || ''))}" inputmode="numeric" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" aria-describedby="crContactPrefix" required></div></div>
         </div>
         <div class="form-group"><label for="crPlan">Membership Plan</label><select id="crPlan">
             <option value="Monthly|800" ${selectedPlan === 'Monthly' ? 'selected' : ''}>Monthly — ₱800</option>
@@ -1715,18 +1699,17 @@ function renewMember(id) {
         </select></div>
         <div class="modal-actions"><button class="btn-sm" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="runWithButtonLoading(this, () => completeMemberRenewal('${member.id}'), 'Saving renewal…')"><i class="fas fa-coins"></i> Complete Renewal</button></div>
     `);
-    setupPhMobileInput(document.getElementById('crContact'));
 }
 
 async function completeMemberRenewal(id) {
     const member = members.find(item => item.id === id);
     if (!member) return;
     const name = document.getElementById('crName').value.trim();
-    const contact = document.getElementById('crContact').value.trim();
+    const contact = '0' + document.getElementById('crContact').value;
     const [plan, priceText] = document.getElementById('crPlan').value.split('|');
     const price = Number(priceText);
     if (!name || !contact) { toast('Enter the member name and contact number.', 'error'); return; }
-    if (!/^\d+$/.test(contact) || !/^09\d{9}$/.test(contact)) { toast('Enter a valid PH mobile number using digits only (e.g. 09171234567).', 'error'); return; }
+    if (!/^\d+$/.test(contact) || !/^09\d{9}$/.test(contact)) { toast('Enter a valid PH mobile number with 10 digits after +63 (e.g. 9171234567).', 'error'); return; }
 
     const changedAt = new Date().toISOString();
     const startDate = todayStr();

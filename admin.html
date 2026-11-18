@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IronGrind · Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css?v=20261115-add-member-modal-readability">
+    <link rel="stylesheet" href="assets/css/style.css?v=20261118-add-member-theme">
     <script src="assets/js/theme.js?v=20261105-login-toggle"></script>
 </head>
 <body class="dashboard-body admin-dashboard admin-auth-pending">
@@ -78,7 +78,7 @@
                     </div>
                     <div class="form-group"><label for="staffUsername">Username</label><input id="staffUsername" required pattern="[A-Za-z0-9_]{3,30}" maxlength="30" autocomplete="off"></div>
                     <div class="form-group"><label for="staffEmail">Gmail address</label><input id="staffEmail" type="email" required pattern="[A-Za-z0-9._%+\-]+@[Gg][Mm][Aa][Ii][Ll][.][Cc][Oo][Mm]" maxlength="254" autocomplete="email" placeholder="name@gmail.com" title="Enter a Gmail address ending in @gmail.com"></div>
-                    <div class="form-group"><label for="staffMobile">Mobile number</label><div class="ph-phone-input"><span>+63</span><input id="staffMobile" type="tel" required inputmode="numeric" maxlength="10" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" title="Enter 10 digits beginning with 9"></div></div>
+                    <div class="form-group"><label for="staffMobile">Mobile number</label><div class="ph-phone-input"><span>+63</span><input id="staffMobile" type="tel" required inputmode="numeric" pattern="9[0-9]{9}" placeholder="9171234567" autocomplete="tel-national" title="Enter 10 digits beginning with 9"></div></div>
                     <div class="form-group"><label for="staffGender">Gender</label><select id="staffGender" required><option value="">Select gender</option><option value="Female">Female</option><option value="Male">Male</option><option value="Prefer not to say">Prefer not to say</option></select></div>
                     <div class="form-group staff-form-field-wide"><label for="staffPassword">Password</label><input id="staffPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="staffPasswordHint"><small id="staffPasswordHint" class="field-hint">Use 12–128 characters with uppercase and lowercase letters, a number, and a symbol.</small></div>
                 </div>
@@ -345,7 +345,7 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script src="assets/js/ui-improvements.js?v=20261118-name-capitalization"></script>
+<script src="assets/js/ui-improvements.js?v=20261118-ph-contact"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js?v=20261108-remember-identifier"></script>
 <script src="assets/js/admin-device-approval.js?v=20261110-device-approval"></script>
@@ -358,7 +358,7 @@
 <script src="assets/js/signature.js"></script>
 <script src="assets/js/activity-logs.js?v=20261115-hide-report-exports"></script>
 <script src="assets/js/admin-access.js?v=20261108-reviewed"></script>
-<script src="assets/js/admin.js?v=20261118-name-capitalization"></script>
+<script src="assets/js/admin.js?v=20261118-ph-contact"></script>
 <script src="assets/js/staff-accounts.js?v=20261108-names-member-email"></script>
 </body>
 </html>

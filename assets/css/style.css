@@ -2596,45 +2596,55 @@ html[data-admin-theme="light"] body.admin-dashboard .dashboard-sales-summary str
     .dashboard-sales-summary strong { font-size: 1rem; }
 }
 
-/* Admin Add New Member modal: readable light surfaces, clear labels and a
+/* Admin Add New Member modal: theme-aware surfaces, clear labels and a
    footer that stays within the scrollable form instead of covering fields. */
 body.admin-dashboard .modal-content.admin-add-member-modal {
+    --add-member-surface: #fff;
+    --add-member-section: #f5f7fa;
+    --add-member-input: #fff;
+    --add-member-text: #202938;
+    --add-member-label: #445269;
+    --add-member-muted: #536176;
+    --add-member-placeholder: #748197;
+    --add-member-border: #d8dee8;
+    --add-member-input-border: #b9c3d1;
+    --add-member-prefix: #e2e7ef;
     width: min(700px, 96vw);
     max-width: 700px;
     max-height: min(92dvh, 980px);
     padding: 24px;
-    color: #202938;
-    background: #fff;
-    border-color: #cfd6e1;
+    color: var(--add-member-text);
+    background: var(--add-member-surface);
+    border-color: var(--add-member-border);
 }
-body.admin-dashboard .admin-add-member-modal > h3 { margin-bottom: 16px; color: #202938; }
+body.admin-dashboard .admin-add-member-modal > h3 { margin-bottom: 16px; color: var(--add-member-text); }
 body.admin-dashboard .admin-add-member-modal .admin-add-member-section {
     margin-bottom: 16px;
     padding: 18px;
-    border: 1px solid #d8dee8;
+    border: 1px solid var(--add-member-border);
     border-radius: 14px;
-    background: #f5f7fa;
+    background: var(--add-member-section);
 }
 body.admin-dashboard .admin-add-member-modal .admin-add-member-section > div:first-child {
-    color: #273449;
-    border-bottom-color: #d8dee8 !important;
+    color: var(--add-member-text);
+    border-bottom-color: var(--add-member-border) !important;
 }
 body.admin-dashboard .admin-add-member-modal .admin-add-member-section p,
-body.admin-dashboard .admin-add-member-modal .admin-add-member-section small { color: #536176 !important; }
+body.admin-dashboard .admin-add-member-modal .admin-add-member-section small { color: var(--add-member-muted) !important; }
 body.admin-dashboard .admin-add-member-modal .form-group label,
-body.admin-dashboard .admin-add-member-modal .admin-add-member-section label { color: #445269; }
+body.admin-dashboard .admin-add-member-modal .admin-add-member-section label { color: var(--add-member-label); }
 body.admin-dashboard .admin-add-member-modal .form-group input,
 body.admin-dashboard .admin-add-member-modal .form-group select,
 body.admin-dashboard .admin-add-member-modal .form-group textarea {
-    color: #202938;
-    background: #fff;
-    border-color: #b9c3d1;
+    color: var(--add-member-text);
+    background: var(--add-member-input);
+    border-color: var(--add-member-input-border);
 }
-body.admin-dashboard .admin-add-member-modal .form-group input::placeholder { color: #748197; opacity: 1; }
+body.admin-dashboard .admin-add-member-modal .form-group input::placeholder { color: var(--add-member-placeholder); opacity: 1; }
 body.admin-dashboard .admin-add-member-modal .admin-add-member-section label:has(input[type="radio"]) {
-    color: #273449;
-    background: #fff !important;
-    border-color: #cbd3df !important;
+    color: var(--add-member-text);
+    background: var(--add-member-input) !important;
+    border-color: var(--add-member-input-border) !important;
 }
 body.admin-dashboard .admin-add-member-modal .admin-add-member-actions {
     position: sticky;
@@ -2642,8 +2652,27 @@ body.admin-dashboard .admin-add-member-modal .admin-add-member-actions {
     z-index: 2;
     margin: 0 -24px -24px;
     padding: 14px 24px 18px;
-    border-top: 1px solid #d8dee8;
-    background: rgba(255,255,255,.97);
+    border-top: 1px solid var(--add-member-border);
+    background: var(--add-member-surface);
+}
+html[data-dashboard-theme="dark"] body.admin-dashboard .modal-content.admin-add-member-modal {
+    color-scheme: dark;
+    --add-member-surface: #15181e;
+    --add-member-section: #1c2028;
+    --add-member-input: #101319;
+    --add-member-text: #eef1f6;
+    --add-member-label: #c7cfdd;
+    --add-member-muted: #aab5c8;
+    --add-member-placeholder: #9ba8bd;
+    --add-member-border: #303744;
+    --add-member-input-border: #455063;
+    --add-member-prefix: #262d38;
+}
+body.admin-dashboard .admin-add-member-modal .ph-phone-input > span {
+    color: var(--add-member-label);
+    background: var(--add-member-prefix);
+    border-color: var(--add-member-input-border);
+    padding-inline: 9px;
 }
 @media(max-width: 640px) {
     body.admin-dashboard .modal-content.admin-add-member-modal { padding: 18px 14px; max-height: calc(100dvh - 20px); }

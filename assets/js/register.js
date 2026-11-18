@@ -46,15 +46,6 @@ function closeModal() { document.getElementById('modalOverlay').classList.add('h
 
 const registrationSignature = initDigitalSignature('registrationSignature', 'clearRegistrationSignature');
 
-const phoneInputs = [document.getElementById('regMobile'), document.getElementById('regEcContact')];
-phoneInputs.forEach(input => {
-    input.addEventListener('input', function() {
-        const digits = this.value.replace(/\D/g, '');
-        this.value = digits && !digits.startsWith('9') ? '' : digits.slice(0, 10);
-        this.setCustomValidity(this.value && !/^9\d{9}$/.test(this.value) ? 'Enter 10 digits beginning with 9 after +63.' : '');
-    });
-});
-
 const registrationHeight = document.getElementById('regHeight');
 const registrationHeightUnit = document.getElementById('regHeightUnit');
 let previousHeightUnit = registrationHeightUnit.value;
