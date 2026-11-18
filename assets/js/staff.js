@@ -68,17 +68,19 @@ function setStaffMembershipAction(action) {
     }
 }
 
-async function searchStaffMembers(query, resultsId, selectedId, onSelect, activeOnly = false) {
+async function searchStaffMembers(query, resultsId, selectedId, onSelect, activeOnly, isCurrent) {
     const results = document.getElementById(resultsId);
     const selected = document.getElementById(selectedId);
     selected.hidden = true;
     selected.replaceChildren();
     onSelect(null);
     const normalized = query.trim();
-    if (normalized.length < 2) { results.textContent = 'Enter at least 2 characters to search.'; return; }
+    if (!normalized) { results.replaceChildren(); return; }
+    if (normalized.length < 2 || normalized.length > 80) { results.textContent = 'Enter 2–80 characters to search.'; return; }
     results.textContent = 'Searching members...';
     const rpcName = activeOnly ? 'staff_search_active_members' : 'staff_search_members';
     const { data, error } = await staffClient.rpc(rpcName, { p_query: normalized });
+    if (!isCurrent()) return;
     if (error) { results.textContent = error.message; return; }
     results.replaceChildren();
     if (!data?.length) { results.textContent = 'No members found for this search.'; return; }
@@ -567,8 +569,21 @@ async function submitStaffAttendanceLookup(event) {
         }
     } catch (error) { if (revision === staffAttendanceSearchRevision) results.textContent = error.message || 'Could not search members.'; }
 }
-document.getElementById('staffIdentifier').addEventListener('input', clearStaffAttendanceSelection);
-document.getElementById('staffScanForm').addEventListener('submit', submitStaffAttendanceLookup);
+const staffIdentifier = document.getElementById('staffIdentifier');
+const staffScanForm = document.getElementById('staffScanForm');
+let staffAttendanceLookupTimer;
+staffIdentifier.addEventListener('input', () => {
+    clearTimeout(staffAttendanceLookupTimer);
+    clearStaffAttendanceSelection();
+    const length = staffIdentifier.value.trim().length;
+    if (length >= 2 && length <= 80) {
+        staffAttendanceLookupTimer = setTimeout(() => staffScanForm.requestSubmit(), 250);
+    }
+});
+staffScanForm.addEventListener('submit', event => {
+    clearTimeout(staffAttendanceLookupTimer);
+    submitStaffAttendanceLookup(event);
+});
 document.getElementById('refreshStaffAttendance').onclick = () => refreshStaffAttendance().catch(error => { staffStatus.textContent = error.message; });
 document.getElementById('staffLogout').onclick = async () => {
     try {
@@ -582,14 +597,37 @@ document.getElementById('staffLogout').onclick = async () => {
 };
 document.querySelectorAll('[data-staff-view]').forEach(button => button.addEventListener('click', () => setStaffView(button.dataset.staffView)));
 document.querySelectorAll('[data-staff-membership-action]').forEach(button => button.addEventListener('click', () => setStaffMembershipAction(button.dataset.staffMembershipAction)));
-document.getElementById('staffRenewalSearchButton').addEventListener('click', () => searchStaffMembers(
-    document.getElementById('staffRenewalSearch').value, 'staffRenewalResults', 'staffRenewalSelected', member => { staffSelectedRenewalMember = member; }
-));
-document.getElementById('staffChangeSearchButton').addEventListener('click', () => searchStaffMembers(
-    document.getElementById('staffChangeSearch').value, 'staffChangeResults', 'staffChangeSelected', member => { staffSelectedPlanChangeMember = member; }, true
-));
-document.getElementById('staffRenewalSearch').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); document.getElementById('staffRenewalSearchButton').click(); } });
-document.getElementById('staffChangeSearch').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); document.getElementById('staffChangeSearchButton').click(); } });
+function bindStaffMembershipSearch(prefix, onSelect, activeOnly = false) {
+    const input = document.getElementById(`${prefix}Search`);
+    const resultsId = `${prefix}Results`;
+    const selectedId = `${prefix}Selected`;
+    let timer;
+    let revision = 0;
+    function runSearch(query) {
+        const current = ++revision;
+        const isCurrent = () => current === revision;
+        searchStaffMembers(query, resultsId, selectedId, onSelect, activeOnly, isCurrent).catch(error => {
+            if (isCurrent()) document.getElementById(resultsId).textContent = error.message || 'Could not search members.';
+        });
+    }
+    function searchNow() {
+        clearTimeout(timer);
+        runSearch(input.value);
+    }
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        runSearch('');
+        if (input.value.trim().length >= 2) timer = setTimeout(searchNow, 250);
+    });
+    input.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        searchNow();
+    });
+    document.getElementById(`${prefix}SearchButton`).addEventListener('click', searchNow);
+}
+bindStaffMembershipSearch('staffRenewal', member => { staffSelectedRenewalMember = member; });
+bindStaffMembershipSearch('staffChange', member => { staffSelectedPlanChangeMember = member; }, true);
 document.getElementById('staffRenewMembership').addEventListener('click', () => submitStaffMembershipChange('renewal'));
 document.getElementById('staffSavePlanChange').addEventListener('click', () => submitStaffMembershipChange('plan_change'));
 function filterStaffRequests() {

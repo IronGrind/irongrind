@@ -644,10 +644,34 @@ function isInactiveMember(member, today = todayStr()) {
         || Boolean(member?.expiry && today >= addDays(member.expiry, 5));
 }
 
+function renderMemberSuggestions(input, matches, query) {
+    const suggestions = document.getElementById(`${input.id}Suggestions`);
+    suggestions.replaceChildren();
+    if (!query) return;
+
+    const names = [...new Set(matches.map(member => member.name).filter(Boolean))];
+    const startsWithQuery = name => name.toLowerCase().split(/\s+/).some(part => part.startsWith(query))
+        || name.toLowerCase().startsWith(query);
+    names.sort((first, second) => Number(startsWithQuery(second)) - Number(startsWithQuery(first))
+        || first.localeCompare(second));
+    for (const name of names.slice(0, 8)) {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.textContent = name;
+        option.addEventListener('click', () => {
+            input.value = name;
+            renderMembers();
+            suggestions.replaceChildren();
+            input.focus();
+        });
+        suggestions.append(option);
+    }
+}
+
 function renderMembers() {
     const isExpiredTab = currentMemberTab === 'expired';
     const searchEl = document.getElementById(isExpiredTab ? 'expiredMemberSearch' : 'memberSearch');
-    const query = searchEl ? searchEl.value.toLowerCase() : '';
+    const query = searchEl ? searchEl.value.trim().toLowerCase() : '';
     const today = todayStr();
     let filtered = members.filter(m => {
         if (isExpiredTab) return Boolean(m.expiry && m.expiry < today && !isInactiveMember(m, today));
@@ -658,6 +682,7 @@ function renderMembers() {
         return true;
     });
 
+    if (searchEl) renderMemberSuggestions(searchEl, filtered, query);
     const listEl = document.getElementById(isExpiredTab ? 'expiredMembersList' : 'membersList');
     document.getElementById('expiredMembersCount').textContent = members.filter(m => m.expiry && m.expiry < today && !isInactiveMember(m, today)).length;
     if (filtered.length === 0) {

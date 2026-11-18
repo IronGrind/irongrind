@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IronGrind · Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css?v=20261118-add-member-theme">
+    <link rel="stylesheet" href="assets/css/style.css?v=20261118-live-member-search">
     <script src="assets/js/theme.js?v=20261105-login-toggle"></script>
 </head>
 <body class="dashboard-body admin-dashboard admin-auth-pending">
@@ -159,7 +159,8 @@
                         <div class="membership-controls">
                             <div class="search">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="memberSearch" placeholder="Search members by name..." oninput="renderMembers()">
+                                <input type="text" id="memberSearch" placeholder="Search members by name..." oninput="renderMembers()" autocomplete="off" aria-controls="memberSearchSuggestions">
+                                <div id="memberSearchSuggestions" class="member-search-suggestions" role="group" aria-label="Matching member names"></div>
                             </div>
                             <div class="plan-pills" id="planPills">
                                 <span class="pill active" data-plan="all" onclick="filterPlan('all')">All</span>
@@ -174,7 +175,8 @@
                         <div class="membership-controls">
                             <div class="search">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="expiredMemberSearch" placeholder="Search expired members by name..." oninput="renderMembers()">
+                                <input type="text" id="expiredMemberSearch" placeholder="Search expired members by name..." oninput="renderMembers()" autocomplete="off" aria-controls="expiredMemberSearchSuggestions">
+                                <div id="expiredMemberSearchSuggestions" class="member-search-suggestions" role="group" aria-label="Matching member names"></div>
                             </div>
                             <div class="plan-pills" id="expiredPlanPills">
                                 <span class="pill active" data-plan="all" onclick="filterPlan('all')">All</span>
@@ -358,7 +360,7 @@
 <script src="assets/js/signature.js"></script>
 <script src="assets/js/activity-logs.js?v=20261115-hide-report-exports"></script>
 <script src="assets/js/admin-access.js?v=20261108-reviewed"></script>
-<script src="assets/js/admin.js?v=20261118-ph-contact"></script>
+<script src="assets/js/admin.js?v=20261118-live-member-search"></script>
 <script src="assets/js/staff-accounts.js?v=20261108-names-member-email"></script>
 </body>
 </html>
