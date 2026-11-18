@@ -51,6 +51,7 @@ html[data-dashboard-theme="light"] body.staff-dashboard .staff-history .attendan
 .staff-sale-record small, .staff-registration-form small { color: #a4adc2; }
 .staff-registration-form { margin-top: 16px; }
 .staff-registration-form .staff-form-grid { margin-top: 14px; }
+.staff-registration-form .staff-form-grid { align-items: start; }
 .staff-signature-wrap { height: 170px; overflow: hidden; border: 1px solid #d7dbe3; border-radius: 12px; background: #fff; }
 .staff-signature-wrap canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .staff-form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 16px; }

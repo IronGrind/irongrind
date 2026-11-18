@@ -434,7 +434,7 @@ async function submitStaffWalkin(event) {
         fullName: '',
         email: document.getElementById('walkinEmail').value.trim(),
         password: document.getElementById('walkinPassword').value,
-        mobile: document.getElementById('walkinMobile').value.trim(),
+        mobile: `0${document.getElementById('walkinMobile').value}`,
         dateOfBirth: birthDate, age, sex: document.getElementById('walkinSex').value,
         emergencyName: document.getElementById('walkinEmergencyName').value.trim(),
         emergencyRelationship: document.getElementById('walkinEmergencyRelationship').value.trim(),
@@ -756,6 +756,12 @@ document.getElementById('refreshStaffSales').addEventListener('click', async () 
     const status = document.getElementById('staffSalesStatus'); status.textContent = 'Refreshing…';
     try { await Promise.all([loadStaffProducts(), refreshStaffProductSales()]); status.textContent = ''; }
     catch (error) { status.textContent = error.message; }
+});
+document.getElementById('walkinMobile').addEventListener('input', event => {
+    const input = event.currentTarget;
+    const digits = input.value.replace(/[^0-9]/g, '').replace(/^(?:63|0)(?=9)/, '');
+    const mobile = digits.slice(0, 10);
+    if (input.value !== mobile) input.value = mobile;
 });
 document.getElementById('staffWalkinForm').addEventListener('submit', submitStaffWalkin);
 window.setInterval(() => {
