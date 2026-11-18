@@ -500,3 +500,38 @@ html[data-dashboard-theme="dark"] body.staff-dashboard .staff-request-dialog-clo
   .staff-request-dialog-content { padding:15px 18px; }
   .staff-request-dialog-footer { padding:12px 18px 16px; }
 }
+
+.staff-membership-confirmation {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    box-sizing: border-box;
+    width: min(460px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 24px;
+    border: 1px solid #343b48;
+    border-radius: 16px;
+    background: #16191f;
+    color: #eef1f6;
+    box-shadow: 0 20px 60px #0005;
+}
+.staff-membership-confirmation::backdrop { background: #0009; }
+.staff-membership-confirmation h2 { margin: 0 0 16px; font-size: 1.15rem; }
+.staff-membership-confirmation dl {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 16px;
+    margin: 0 0 16px;
+    font-size: .9rem;
+}
+.staff-membership-confirmation dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; }
+.staff-membership-confirmation dt,
+.staff-membership-confirmation p { color: #aab5c8; }
+.staff-membership-confirmation p { margin: 0; font-size: .85rem; line-height: 1.45; }
+html[data-dashboard-theme="light"] .staff-membership-confirmation {
+    background: #fff;
+    color: #202938;
+    border-color: #cfd6e1;
+}
+html[data-dashboard-theme="light"] .staff-membership-confirmation dt,
+html[data-dashboard-theme="light"] .staff-membership-confirmation p { color: #536176; }

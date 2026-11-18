@@ -104,6 +104,26 @@ async function searchStaffMembers(query, resultsId, selectedId, onSelect, active
     });
 }
 
+function confirmStaffMembershipChange(title, details, confirmLabel) {
+    const dialog = document.getElementById('staffMembershipConfirmation');
+    document.getElementById('staffMembershipConfirmationTitle').textContent = title;
+    document.getElementById('staffMembershipConfirmButton').textContent = confirmLabel;
+    const summary = document.getElementById('staffMembershipConfirmationDetails');
+    summary.replaceChildren();
+    for (const [label, value] of details) {
+        const term = document.createElement('dt');
+        const description = document.createElement('dd');
+        term.textContent = label;
+        description.textContent = value;
+        summary.append(term, description);
+    }
+    dialog.returnValue = '';
+    dialog.showModal();
+    return new Promise(resolve => {
+        dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true });
+    });
+}
+
 async function submitStaffMembershipChange(eventType) {
     const isRenewal = eventType === 'renewal';
     const member = isRenewal ? staffSelectedRenewalMember : staffSelectedPlanChangeMember;
@@ -112,7 +132,20 @@ async function submitStaffMembershipChange(eventType) {
     if (!member) { status.textContent = 'Search for and select a member first.'; return; }
     const [plan, priceText, daysText] = select.value.split('|');
     const { startDate, expiryDate } = staffMembershipDates(Number(daysText));
-    if (!window.confirm(`${isRenewal ? 'Renew membership' : 'Change membership plan'}\n\nMember: ${member.full_name}\nCurrent plan: ${member.plan || 'No plan'}\nCurrent expiry: ${member.expiry_date || 'Not set'}\nNew plan: ${plan}\nPayment: ${formatStaffPeso(Number(priceText))}\nStarts: ${startDate}\nNew expiry: ${expiryDate}\n\nThe new dates replace the current membership dates. Confirm payment has been received before continuing.`)) return;
+    const confirmed = await confirmStaffMembershipChange(
+        isRenewal ? 'Renew membership' : 'Change membership plan',
+        [
+            ['Member', member.full_name],
+            ['Current plan', member.plan || 'No plan'],
+            ['Current expiry', member.expiry_date || 'Not set'],
+            ['New plan', plan],
+            ['Payment', formatStaffPeso(Number(priceText))],
+            ['Starts', startDate],
+            ['New expiry', expiryDate],
+        ],
+        isRenewal ? 'Confirm renewal' : 'Confirm plan change'
+    );
+    if (!confirmed) return;
     const receipt = `IG-${isRenewal ? 'SR' : 'SC'}-${crypto.randomUUID().replaceAll('-', '').slice(0, 16).toUpperCase()}`;
     status.textContent = isRenewal ? 'Recording renewal payment...' : 'Saving membership plan change...';
     const button = document.getElementById(isRenewal ? 'staffRenewMembership' : 'staffSavePlanChange'); button.disabled = true;
