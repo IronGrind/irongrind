@@ -36,9 +36,9 @@
                     <i class="fas fa-user" style="color:#d31212;"></i><span>Personal Information</span>
                 </div>
                 <div class="form-row form-row-three">
-                    <div class="form-group"><label for="regFirstName">First Name *</label><input type="text" id="regFirstName" autocomplete="given-name" required></div>
-                    <div class="form-group"><label for="regMiddleName">Middle Name</label><input type="text" id="regMiddleName" autocomplete="additional-name"></div>
-                    <div class="form-group"><label for="regLastName">Last Name *</label><input type="text" id="regLastName" autocomplete="family-name" required></div>
+                    <div class="form-group"><label for="regFirstName">First Name *</label><input type="text" id="regFirstName" data-capitalize-name autocomplete="given-name" required></div>
+                    <div class="form-group"><label for="regMiddleName">Middle Name</label><input type="text" id="regMiddleName" data-capitalize-name autocomplete="additional-name"></div>
+                    <div class="form-group"><label for="regLastName">Last Name *</label><input type="text" id="regLastName" data-capitalize-name autocomplete="family-name" required></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Date of Birth *</label><input type="date" id="regDob" required></div>
@@ -65,7 +65,7 @@
                     <i class="fas fa-phone" style="color:#d31212;"></i><span>Emergency Contact</span>
                 </div>
                 <div class="form-row form-row-three">
-                    <div class="form-group"><label>Name *</label><input type="text" id="regEcName" placeholder="Maria Dela Cruz" required></div>
+                    <div class="form-group"><label>Name *</label><input type="text" id="regEcName" data-capitalize-name placeholder="Maria Dela Cruz" required></div>
                     <div class="form-group"><label>Relationship *</label><input type="text" id="regEcRelation" placeholder="Mother" required></div>
                     <div class="form-group"><label>Contact Number *</label><div class="ph-phone-input"><span>+63</span><input type="tel" id="regEcContact" placeholder="9171234567" inputmode="numeric" maxlength="10" pattern="9[0-9]{9}" autocomplete="tel-national" required></div></div>
                 </div>
@@ -223,7 +223,7 @@
     <div id="modalOverlay" class="modal-overlay hidden" onclick="if(event.target===this) closeModal()">
         <div class="modal-content" id="modalContent"></div>
     </div>
-    <script src="assets/js/ui-improvements.js?v=20261110-resume-existing-registration"></script>
+    <script src="assets/js/ui-improvements.js?v=20261118-name-capitalization"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabase-client.js?v=20261104-isolated-registration"></script>
     <script src="assets/js/signature.js"></script>

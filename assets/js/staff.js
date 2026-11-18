@@ -438,7 +438,7 @@ async function submitStaffWalkin(event) {
         dateOfBirth: birthDate, age, sex: document.getElementById('walkinSex').value,
         emergencyName: document.getElementById('walkinEmergencyName').value.trim(),
         emergencyRelationship: document.getElementById('walkinEmergencyRelationship').value.trim(),
-        emergencyContact: document.getElementById('walkinEmergencyPhone').value.trim(),
+        emergencyContact: `0${document.getElementById('walkinEmergencyPhone').value}`,
         plan, planPrice: price, startDate, expiryDate,
         signatureData: staffSignaturePad.toDataURL(), fitnessGoals: [], healthConditions: [],
         staffWalkinRegistration: true,
@@ -757,11 +757,20 @@ document.getElementById('refreshStaffSales').addEventListener('click', async () 
     try { await Promise.all([loadStaffProducts(), refreshStaffProductSales()]); status.textContent = ''; }
     catch (error) { status.textContent = error.message; }
 });
-document.getElementById('walkinMobile').addEventListener('input', event => {
+document.getElementById('walkinMiddleInitial').addEventListener('input', event => {
     const input = event.currentTarget;
-    const digits = input.value.replace(/[^0-9]/g, '').replace(/^(?:63|0)(?=9)/, '');
-    const mobile = digits.slice(0, 10);
-    if (input.value !== mobile) input.value = mobile;
+    const uppercase = input.value.toUpperCase();
+    if (/^\p{L}\.?$/u.test(uppercase) && input.value !== uppercase) {
+        input.value = uppercase;
+    }
+});
+['walkinMobile', 'walkinEmergencyPhone'].forEach(id => {
+    document.getElementById(id).addEventListener('input', event => {
+        const input = event.currentTarget;
+        const digits = input.value.replace(/[^0-9]/g, '').replace(/^(?:63|0)(?=9)/, '');
+        const mobile = digits.slice(0, 10);
+        if (input.value !== mobile) input.value = mobile;
+    });
 });
 document.getElementById('staffWalkinForm').addEventListener('submit', submitStaffWalkin);
 window.setInterval(() => {

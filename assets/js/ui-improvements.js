@@ -252,3 +252,19 @@
     enhance();
     new MutationObserver(() => enhance()).observe(document.body, { childList: true, subtree: true });
 })();
+
+document.addEventListener('input', event => {
+    const input = event.target;
+    if (event.isComposing || !input.matches?.('input[data-capitalize-name]')) return;
+
+    const capitalized = input.value.replace(/(^|[\s-])(\p{L})/gu,
+        (match, separator, letter) => {
+            const uppercase = letter.toUpperCase();
+            return uppercase.length === letter.length ? separator + uppercase : match;
+        });
+    if (capitalized === input.value) return;
+
+    const { selectionStart, selectionEnd, selectionDirection } = input;
+    input.value = capitalized;
+    input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+}, true);

@@ -72,9 +72,9 @@
             <form id="staffAccountForm">
                 <div class="staff-form-grid">
                     <div class="staff-name-fields staff-form-field-wide">
-                        <div class="form-group"><label for="staffFirstName">First name (FN)</label><input id="staffFirstName" required maxlength="70" autocomplete="given-name"></div>
-                        <div class="form-group"><label for="staffMiddleInitial">Middle initial (MI, optional)</label><input id="staffMiddleInitial" maxlength="2" pattern="\p{L}[.]?" autocomplete="additional-name" placeholder="M." title="Enter one letter, optionally followed by a period."></div>
-                        <div class="form-group"><label for="staffLastName">Last name (LN)</label><input id="staffLastName" required maxlength="70" autocomplete="family-name"></div>
+                        <div class="form-group"><label for="staffFirstName">First name (FN)</label><input id="staffFirstName" data-capitalize-name required maxlength="70" autocomplete="given-name"></div>
+                        <div class="form-group"><label for="staffMiddleInitial">Middle initial (MI, optional)</label><input id="staffMiddleInitial" data-capitalize-name maxlength="2" pattern="\p{L}[.]?" autocomplete="additional-name" placeholder="M." title="Enter one letter, optionally followed by a period."></div>
+                        <div class="form-group"><label for="staffLastName">Last name (LN)</label><input id="staffLastName" data-capitalize-name required maxlength="70" autocomplete="family-name"></div>
                     </div>
                     <div class="form-group"><label for="staffUsername">Username</label><input id="staffUsername" required pattern="[A-Za-z0-9_]{3,30}" maxlength="30" autocomplete="off"></div>
                     <div class="form-group"><label for="staffEmail">Gmail address</label><input id="staffEmail" type="email" required pattern="[A-Za-z0-9._%+\-]+@[Gg][Mm][Aa][Ii][Ll][.][Cc][Oo][Mm]" maxlength="254" autocomplete="email" placeholder="name@gmail.com" title="Enter a Gmail address ending in @gmail.com"></div>
@@ -345,7 +345,7 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
-<script src="assets/js/ui-improvements.js?v=20261111-inventory-password-cleanup"></script>
+<script src="assets/js/ui-improvements.js?v=20261118-name-capitalization"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js?v=20261108-remember-identifier"></script>
 <script src="assets/js/admin-device-approval.js?v=20261110-device-approval"></script>
@@ -358,7 +358,7 @@
 <script src="assets/js/signature.js"></script>
 <script src="assets/js/activity-logs.js?v=20261115-hide-report-exports"></script>
 <script src="assets/js/admin-access.js?v=20261108-reviewed"></script>
-<script src="assets/js/admin.js?v=20261116-admin-text-encoding"></script>
+<script src="assets/js/admin.js?v=20261118-name-capitalization"></script>
 <script src="assets/js/staff-accounts.js?v=20261108-names-member-email"></script>
 </body>
 </html>

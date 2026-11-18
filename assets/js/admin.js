@@ -1297,9 +1297,9 @@ function openAddMemberModal() {
                 <i class="fas fa-user" style="color:#ff6b2b;"></i><span>Personal Information</span>
             </div>
             <div class="form-row" style="grid-template-columns:repeat(3,minmax(0,1fr));">
-                <div class="form-group"><label for="wiFirstName">First name (FN) *</label><input type="text" id="wiFirstName" required maxlength="70" autocomplete="given-name" placeholder="Juan"></div>
-                <div class="form-group"><label for="wiMiddleInitial">Middle initial (MI, optional)</label><input type="text" id="wiMiddleInitial" maxlength="2" autocomplete="additional-name" placeholder="M." title="Enter one letter, optionally followed by a period."></div>
-                <div class="form-group"><label for="wiLastName">Last name (LN) *</label><input type="text" id="wiLastName" required maxlength="70" autocomplete="family-name" placeholder="Dela Cruz"></div>
+                <div class="form-group"><label for="wiFirstName">First name (FN) *</label><input type="text" id="wiFirstName" data-capitalize-name required maxlength="70" autocomplete="given-name" placeholder="Juan"></div>
+                <div class="form-group"><label for="wiMiddleInitial">Middle initial (MI, optional)</label><input type="text" id="wiMiddleInitial" data-capitalize-name maxlength="2" autocomplete="additional-name" placeholder="M." title="Enter one letter, optionally followed by a period."></div>
+                <div class="form-group"><label for="wiLastName">Last name (LN) *</label><input type="text" id="wiLastName" data-capitalize-name required maxlength="70" autocomplete="family-name" placeholder="Dela Cruz"></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label for="wiDob">Date of Birth *</label><input type="date" id="wiDob"></div>
@@ -1325,7 +1325,7 @@ function openAddMemberModal() {
                 <i class="fas fa-phone" style="color:#ff6b2b;"></i><span>Emergency Contact</span>
             </div>
             <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
-                <div class="form-group"><label>Name *</label><input type="text" id="wiEcName" placeholder="Maria Dela Cruz"></div>
+                <div class="form-group"><label>Name *</label><input type="text" id="wiEcName" data-capitalize-name placeholder="Maria Dela Cruz"></div>
                 <div class="form-group"><label>Relationship *</label><input type="text" id="wiEcRelation" placeholder="Mother"></div>
                 <div class="form-group"><label>Contact Number *</label><input type="tel" id="wiEcContact" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel"></div>
             </div>
@@ -1705,7 +1705,7 @@ function renewMember(id) {
         <h3><i class="fas fa-sync-alt"></i> Counter Membership Renewal</h3>
         <p class="modal-sub">Choose the renewal plan and record the counter payment.</p>
         <div class="form-row">
-            <div class="form-group"><label for="crName">Full Name *</label><input type="text" id="crName" value="${escapeHTML(member.name || '')}" required></div>
+            <div class="form-group"><label for="crName">Full Name *</label><input type="text" id="crName" data-capitalize-name value="${escapeHTML(member.name || '')}" required></div>
             <div class="form-group"><label for="crContact">Contact Number *</label><input type="tel" id="crContact" value="${escapeHTML(member.contact || '')}" inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" placeholder="09171234567" autocomplete="tel" required></div>
         </div>
         <div class="form-group"><label for="crPlan">Membership Plan</label><select id="crPlan">
