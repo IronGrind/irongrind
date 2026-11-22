@@ -18,22 +18,10 @@
         "**/AGENTS.md": true,
         "**/.vscode": true,
         "supabase/.temp": true,
-        "Documentations/Review Backups": true,
-        "Documentations/Review Evidence": true,
-        "Documentations/Review Previews": true,
-        "Documentations/Review Notes": true,
-        "Documentations/Tools": true,
-        "Documentations/Chapter 3 Diagrams/_Archive": true,
-        "Documentations/Chapter 3 Diagrams/_Sources": true,
-        "Documentations/Prototype Screenshots/Originals": true,
-        "Documentations/Prototype Screenshots/Updated FEATURES": true,
-        "Documentations/Prototype Screenshots/_Sources": true,
-        "Documentations/Chapter 1.docx": true,
-        "Documentations/Chapter 2.docx": true,
-        "Documentations/Chapter 3.docx": true,
-        "Documentations/Chapters 1-3 - DFD explanation corrected.docx": true,
-        "Documentations/Chapters 1-3 - Reviewed and corrected.docx": true,
-        "Documentations/Chapters 1-3 Final Consistency Revision.docx": true,
-        "Documentations/IronGrind – Chapters 1–3 – Draft for Adviser Review.docx": true
+        ".edge-*": true,
+        ".tmp-edge-*": true,
+        "Documentations": true,
+        "IronGrind_Final_Paper_v1_*.docx": true,
+        "README.md": true
     }
 }
